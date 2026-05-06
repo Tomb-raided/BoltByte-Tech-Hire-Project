@@ -52,12 +52,23 @@ class boltbyteproject():
         self.admin = tk.Frame(self.notebook, highlightbackground="black", highlightthickness=2)
         
         self.notebook.add(self.rentals, text="Rentals")
-        self.notebook.add(self.rentals, text="Returns")
+        self.notebook.add(self.returns, text="Returns")
         self.notebook.add(self.admin, text="Staff Access")
-    
-    
-    
-    
+        
+        self.rentalsUI()
+        self.returnsUI()
+        self.adminUI()
+        
+        def rentalsUI(self):
+            outer = tk.Frame(self.rentals, bg="#000000")
+            outer.pack(expand=True, fill="both", padx=10, pady=10)
+            
+            left = tk.Frame(outer)
+            left.pack()
+            left.pack_propagate(False)
+            
+            
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.attributes('-fullscreen', True)
