@@ -3,24 +3,24 @@ from tkinter import ttk, messagebox
 import datetime
 import json
 
-imageexist = True
-try:
-    from PIL import Image, ImageTK
-except:
-    imageexist = False
-    messagebox.showerror("Error, library PIL failed to Initialise, please read the README.MD file and restart the Program")
+#imageexist = True
+#try:
+#    from PIL import Image, ImageTK
+#except:
+#    imageexist = False
+#    messagebox.showerror("Error, library PIL failed to Initialise, please read the README.MD file and restart the Program")
     
 storeitems = [
-    {"id": "001","name":"Keyboard","colour":"#E94343","dayprice":"9.99"},
-    {"id": "002","name":"Headphones","colour":"#CF5353","dayprice":"7.99"},
-    {"id": "003","name":"Mouse","colour":"#D9DC32","dayprice":"11.99"},
-    {"id": "004","name":"Gaming Keyboard","colour":"#91D131","dayprice":"14.99"},
-    {"id": "005","name":"Gaming HeadphonesB","colour":"#33C882","dayprice":"11.99"},
-    {"id": "006","name":"Gaming HeadphonesP","colour":"#35D9C6","dayprice":"12.99"},
-    {"id": "007","name":"Gaming Mouse","colour":"#2797D7","dayprice":"14.99"},
-    {"id": "008","name":"XB1 Controller","colour":"#4B28CB","dayprice":"9.99"},
-    {"id": "009","name":"PS5 Controller","colour":"#DC26CA","dayprice":"9.99"},
-    {"id": "010","name":"Dummy Item","colour":"#C92780","dayprice":"9.99"}
+    {"id": "001","name":"Keyboard","colour": "#E94343","dayprice": 9.99},
+    {"id": "002","name":"Headphones","colour": "#CF5353","dayprice": 7.99},
+    {"id": "003","name":"Mouse","colour": "#D9DC32","dayprice": 11.99},
+    {"id": "004","name":"Gaming Keyboard","colour": "#91D131","dayprice": 14.99},
+    {"id": "005","name":"Gaming HeadphonesB","colour": "#33C882","dayprice": 11.99},
+    {"id": "006","name":"Gaming HeadphonesP","colour": "#35D9C6","dayprice": 12.99},
+    {"id": "007","name":"Gaming Mouse","colour": "#2797D7","dayprice": 14.99},
+    {"id": "008","name":"XB1 Controller","colour": "#4B28CB","dayprice": 9.99},
+    {"id": "009","name":"PS5 Controller","colour": "#DC26CA","dayprice": 9.99},
+    {"id": "010","name":"Dummy Item","colour": "#C92780","dayprice": 9.99},
 ]
 
 GST = 0.15
@@ -66,8 +66,8 @@ class boltbyteproject():
         outer = tk.Frame(self.rentals, bg="#000000")
         outer.pack(expand=True, fill="both", padx=10, pady=10)
         
-        left = tk.Frame(outer)
-        left.pack(left, fill="y")
+        left = tk.Frame(outer, bg="#000000")
+        left.pack(side="left", fill="y")
         left.pack_propagate(False)
         
         tk.Label(left, text="Hireble Equipment",font=("Helvetica", 15, "bold"))
@@ -76,12 +76,12 @@ class boltbyteproject():
             self.itemrows(left, item)
             
         right = tk.Frame(outer)
-        right.pack(right, fill="y", expand=True, padx=(12,0))
+        right.pack(side="right", fill="y", expand=True, padx=(12,0))
         
         Dates = tk.LabelFrame(right,text="Rental Dates", font=("Helvetica", 12, "bold"), bg="black", fg="gray", padx=6, pady=4)
         Dates.pack(fill="x", padx=(0,6))
         
-        self.Dickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
+        self.Pickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
         self.Dropoff_date = tk.StringVar(value=(datetime.date.today() +datetime.timedelta(days=1)).strftime("%d/%m/%Y"))
         
         self.Daterow(Dates, "Pickup Date", self.pickup_date,0)
@@ -96,7 +96,7 @@ class boltbyteproject():
         ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"), bg="black", fg="gray")
         ItemCart.pack(fill="x", padx=(0,6))
         
-        self.CartText = tk.Label(ItemCart,)
+        self.CartText = tk.Label(ItemCart,font=("Courier", 10), state="disabled", bg="white", relief="solid", bd=1, height=8)
         self.CartText.pack(expand=True, fill="both")
         
         totalprice = tk.Frame(right, bg="gray")
@@ -104,37 +104,82 @@ class boltbyteproject():
         
         self.days_hired = self.row_totals(totalprice, "Duration:", "0 Days", 0)
         self.price_subtotal = self.row_totals(totalprice, "Subtotal:", "$0.00", 1)
-        self.Sales_tax = self.row_totals(totalprice,f"({int(0.15*100)}%):","$0.00",2)
+        self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
         self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
         
         tk.Button(right, text="Checkout", command=self.checkout, pady=6).pack(fill="both",padx=(0,6))
         
         self.updatecart()
     
-    def itemrows(self, parrent, item):
-        frame = tk.Frame(parrent, bg=item["Colour"],height=60)
+    def itemrows(self, parent, item):
+        frame = tk.Frame(parent, bg=item["colour"],height=60)
         frame.pack(fill="x",pady=3)
+        frame.propagate(False)
         
-        info = tk.Label(frame,bg=item["Colour"])
+        info = tk.Label(frame,bg=item["colour"])
         info.pack(fill="x",pady=3)
         tk.Label(info,text=item["name"], font=("Helvetica", 12, "bold"))
-        tk.Label(info,text=f"${item['daily_rate']:.2f}/day", font=("Helvetica", 12, "bold"))
+        tk.Label(info,text=f"${item['dayprice']:.2f}/day", font=("Helvetica", 12, "bold"))
         
-        qty_button = tk.Frame(frame, bg=item["Colour"])
-        qty_button(side="right",padx=8)
+        qty_button = tk.Frame(parent, bg=item["colour"])
+        qty_button.pack(side="right",padx=8)
         
-        qty_label = tk.Label(qty_button, text="0", font=("Helvetica", 12, "bold"),fg="white", bg=item["color"], width=2, anchor="center")
+        qty_label = tk.Label(qty_button, text="0", font=("Helvetica", 12, "bold"),fg="white", bg=item["colour"], width=2, anchor="center")
         qty_label.grid(row=0,column=1,pady=2)
         self.item_qty[item["id"]] = qty_label
         
-        tk.Button(qty_button, text="+", width=2, font=("Helvetica", 9, "bold"),
-                  relief="flat", bg="white", fg=item["color"], cursor="hand2",
-                  command=lambda i=item: self._cart_change(i, 1)).grid(row=0, column=2, padx=(2, 0))
-        tk.Button(qty_button, text="−", width=2, font=("Helvetica", 9, "bold"),
-                  relief="flat", bg="white", fg=item["color"], cursor="hand2",
-                  command=lambda i=item: self._cart_change(i, -1)).grid(row=0, column=0, padx=(0, 2))
-    def daterow(self, parrent, label,var, row):
+        tk.Button(qty_button, text="+", width=2, font=("Helvetica", 9, "bold"),relief="flat", bg="white", fg=item["colour"], cursor="hand2",command=lambda i=item: self.updatecart(i, 1)).grid(row=0, column=2, padx=(2, 0))
+        tk.Button(qty_button, text="−", width=2, font=("Helvetica", 9, "bold"),relief="flat", bg="white", fg=item["colour"], cursor="hand2",command=lambda i=item: self.updatecart(i, -1)).grid(row=0, column=0, padx=(0, 2))
         
+    def Daterow(self, parent, label,var, row):
+        tk.Label(parent, text=label, font=("Helvetica", 10), bg="#f8f8f8", width=12, anchor="w").grid(row=row, column=0, sticky="w", pady=2)
+        daterowe = tk.Entry(parent,textvariable=var, font=("Helvetica", 10),width=12, relief="solid", bd=1)
+        daterowe.grid(row=row, column=1, padx=6, pady=2)
+        daterowe.bind("<FocusOut>", lambda ev: self.updatecart())
+    def row_totals(self, parent, item, value,row):
+        font = ("Helvetica", 10)
+        tk.Label(parent, text=item, font=font, anchor="w")
+        label = tk.Label(parent, text=value, font=font, anchor="w")
+        label.grid(row=row, column=1, sticky="e")
+    def daysduration (self):
+        try:
+            pickup = datetime.datetime.strptime(self.Pickup_date.get().strip(), "%d/%m/%Y").date()
+            dropoff = datetime.datetime.strptime(self.Dropoff_date.get().strip(), "%d/%m/%Y").date()
+            daystotal = (dropoff-pickup).daystotal
+            return max(1, daystotal)
+        except ValueError:
+            return 1
+    
+    def updatecart(self):
+        daystotal = self.daysduration()
+        catalog_map = {i["id"]: i for i in storeitems}
+
+        lines = []
+        subtotal = 0.0
+        for item_id, qty in self.cart.items():
+            item = catalog_map[item_id]
+            line_cost = item["dayprice"] * qty * days
+            subtotal += line_cost
+            lines.append(f"{item['name']:<22} x{qty}  ${line_cost:>7.2f}")
+
+        tax = subtotal * GST
+        total = subtotal + tax
+
+        self.CartText.config(state="normal")
+        self.CartText.delete("1.0", tk.END)
+        if lines:
+            header = f"{'Item':<22} Qty  {'Cost':>8}\n" + "─" * 38 + "\n"
+            self.CartText.insert(tk.END, header + "\n".join(lines))
+        else:
+            self.CartText.insert(tk.END, "  No items in cart.")
+        self.CartText.config(state="disabled")
+
+        self.days_hired.config(text=f"{daystotal} day{'s' if daystotal != 1 else ''}")
+        self.price_subtotal.config(text=f"${subtotal:.2f}")
+        self.Sales_tax.config(text=f"${tax:.2f}")
+        self.Total_price.config(text=f"${total:.2f}")
+
+    
 
         
         
