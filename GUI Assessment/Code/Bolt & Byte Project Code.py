@@ -206,7 +206,52 @@ class boltbyteproject():
         self.price_subtotal.config(text=f"${subtotal:.2f}")
         self.Sales_tax.config(text=f"${tax:.2f}")
         self.Total_price.config(text=f"${total:.2f}")
+    def checkout(self):
+        name_var = self.name_entry.get().strip()
+        if not name_var:
+            messagebox.showwarning("Name Field is empty"," Please enter a Name.")
+            return
+        if not self.cart:
+            messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
+            return
 
+        daystotal = self.daysduration()
+        storeitemslist = {i["id"]: i for i in storeitems}
+        order_items = []
+        subtotal = 0.0
+        for item_id, qty in self.cart.items():
+            item = storeitemslist[item_id]
+            line_cost = item["dayprice"] * qty * daystotal
+            subtotal += line_cost
+            order_items.append({
+                "id": item_id,
+                "name": item["name"],
+                "quantity": qty,
+                "line_cost": line_cost
+            })
+        tax = subtotal * GST
+        total = subtotal + tax 
+        order = {
+            "order_id": str(uuid.uuid4()),
+            "customer_name": name_var,
+            "pickup_date": self.Pickup_date.get().strip(),
+            "dropoff_date": self.Dropoff_date.get().strip(),
+            "items": order_items,
+            "subtotal": subtotal,
+            "tax": tax,
+            "total": total
+        }
+        self.data["rentals"][order["order_id"]] = order
+        save_data(self.data)
+        
+        for item_id in self.cart.keys():
+            self.item_qty[item_id].config(text="0")
+        self.cart.clear()
+        self.name_entry.set("")
+        self.updatecart()
+        self.refresh_admin()
+        messagebox.showinfo("Order Placed", f"Thank you {name_var}! Your order has been placed.\nTotal: ${total:.2f}")
+        
     
 
         
