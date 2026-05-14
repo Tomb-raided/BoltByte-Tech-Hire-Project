@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import datetime
 import json
+import os
+import uuid
 
 #imageexist = True
 #try:
@@ -24,6 +26,17 @@ storeitems = [
 ]
 
 GST = 0.15
+BOLTBYTEFILE = os.path.join(os.path.dirname(__file__), "boltbyte_data.json")
+
+def load_data():
+    if os.path.exists(BOLTBYTEFILE):
+        with open(BOLTBYTEFILE, "r") as f:
+            return json.load(f)
+    else:
+        return {"rentals": [], "returns": []}
+def save_data(data):
+    with open(BOLTBYTEFILE, "w") as f:
+        json.dump(data, f, indent=4)
 
 class boltbyteproject():
     def __init__(self,root):
