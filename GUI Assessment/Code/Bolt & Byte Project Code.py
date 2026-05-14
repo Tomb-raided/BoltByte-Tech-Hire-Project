@@ -79,11 +79,11 @@ class boltbyteproject():
         outer = tk.Frame(self.rentals, bg="#000000")
         outer.pack(expand=True, fill="both", padx=10, pady=10)
         
-        left = tk.Frame(outer, bg="#000000")
+        left = tk.Frame(outer, bg="#000000", width=300)
         left.pack(side="left", fill="y")
         left.pack_propagate(False)
         
-        tk.Label(left, text="Hireble Equipment",font=("Helvetica", 15, "bold"))
+        tk.Label(left, text="Hireable Equipment",font=("Helvetica", 15, "bold"), fg="white", bg="black").pack(pady=6)
         
         for item in storeitems:
             self.itemrows(left, item)
@@ -95,21 +95,21 @@ class boltbyteproject():
         Dates.pack(fill="x", padx=(0,6))
         
         self.Pickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
-        self.Dropoff_date = tk.StringVar(value=(datetime.date.today() +datetime.timedelta(days=1)).strftime("%d/%m/%Y"))
+        self.Dropoff_date = tk.StringVar(value=(datetime.date.today() + datetime.timedelta(days=1)).strftime("%d/%m/%Y"))
         
-        self.Daterow(Dates, "Pickup Date", self.pickup_date,0)
-        self.Daterow(Dates, "Dropoff Date", self.dropoff_date,1)
+        self.Daterow(Dates, "Pickup Date", self.Pickup_date,0)
+        self.Daterow(Dates, "Dropoff Date", self.Dropoff_date,1)
         
-        Name = tk.LabelFrame(right,name="Customer Name" ,font=("Helvetica", 12, "bold"), bg="black", fg="gray", padx=6, pady=4)
+        Name = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="black", fg="gray", padx=6, pady=4)
         Name.pack(fill="x", padx=(0,6))
         
-        self.Name_entry = tk.StringVar()
+        self.name_entry = tk.StringVar()
         tk.Entry(Name, textvariable=self.name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1).pack(fill="x")
         
         ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"), bg="black", fg="gray")
         ItemCart.pack(fill="x", padx=(0,6))
         
-        self.CartText = tk.Label(ItemCart,font=("Courier", 10), state="disabled", bg="white", relief="solid", bd=1, height=8)
+        self.CartText = tk.Text(ItemCart,font=("Courier", 10), state="disabled", bg="white", relief="solid", bd=1, height=8)
         self.CartText.pack(expand=True, fill="both")
         
         totalprice = tk.Frame(right, bg="gray")
@@ -120,45 +120,60 @@ class boltbyteproject():
         self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
         self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
         
-        tk.Button(right, text="Checkout", command=self.checkout, pady=6).pack(fill="both",padx=(0,6))
+        tk.Button(right, text="Checkout",command=self.checkout ,pady=6).pack(fill="both",padx=(0,6))
         
         self.updatecart()
     
     def itemrows(self, parent, item):
-        frame = tk.Frame(parent, bg=item["colour"],height=60)
-        frame.pack(fill="x",pady=3)
+        # Create outer frame for each item with fixed height and colored background
+        frame = tk.Frame(parent, bg=item["colour"], height=60)
+        frame.pack(fill="x", pady=3, padx=3)
         frame.propagate(False)
         
-        info = tk.Label(frame,bg=item["colour"])
-        info.pack(fill="x",pady=3)
-        tk.Label(info,text=item["name"], font=("Helvetica", 12, "bold"))
-        tk.Label(info,text=f"${item['dayprice']:.2f}/day", font=("Helvetica", 12, "bold"))
+        # Left side: item info (name and price)
+        info = tk.Frame(frame, bg=item["colour"])
+        info.pack(side="left", fill="both", expand=True, padx=5, pady=3)
+        tk.Label(info, text=item["name"], font=("Helvetica", 12, "bold"), bg=item["colour"]).pack(anchor="w")
+        tk.Label(info, text=f"${item['dayprice']:.2f}/day", font=("Helvetica", 10), bg=item["colour"]).pack(anchor="w")
         
-        qty_button = tk.Frame(parent, bg=item["colour"])
-        qty_button.pack(side="right",padx=8)
+        # Right side: quantity controls (-, quantity display, +)
+        qty_button = tk.Frame(frame, bg=item["colour"])
+        qty_button.pack(side="right", padx=8, pady=3)
         
-        qty_label = tk.Label(qty_button, text="0", font=("Helvetica", 12, "bold"),fg="white", bg=item["colour"], width=2, anchor="center")
-        qty_label.grid(row=0,column=1,pady=2)
+        qty_label = tk.Label(qty_button, text="0", font=("Helvetica", 12, "bold"), fg="white", bg=item["colour"], width=2, anchor="center")
+        qty_label.grid(row=0, column=1, pady=2)
         self.item_qty[item["id"]] = qty_label
         
-        tk.Button(qty_button, text="+", width=2, font=("Helvetica", 9, "bold"),relief="flat", bg="white", fg=item["colour"], cursor="hand2",command=lambda i=item: self.updatecart(i, 1)).grid(row=0, column=2, padx=(2, 0))
-        tk.Button(qty_button, text="−", width=2, font=("Helvetica", 9, "bold"),relief="flat", bg="white", fg=item["colour"], cursor="hand2",command=lambda i=item: self.updatecart(i, -1)).grid(row=0, column=0, padx=(0, 2))
+        tk.Button(qty_button, text="+", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg="white", fg=item["colour"], cursor="hand2", command=lambda i=item: self.cartchange(i, 1)).grid(row=0, column=2, padx=(2, 0))
+        tk.Button(qty_button, text="−", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg="white", fg=item["colour"], cursor="hand2", command=lambda i=item: self.cartchange(i, -1)).grid(row=0, column=0, padx=(0, 2))
         
     def Daterow(self, parent, label,var, row):
         tk.Label(parent, text=label, font=("Helvetica", 10), bg="#f8f8f8", width=12, anchor="w").grid(row=row, column=0, sticky="w", pady=2)
         daterowe = tk.Entry(parent,textvariable=var, font=("Helvetica", 10),width=12, relief="solid", bd=1)
         daterowe.grid(row=row, column=1, padx=6, pady=2)
         daterowe.bind("<FocusOut>", lambda ev: self.updatecart())
+        
     def row_totals(self, parent, item, value,row):
         font = ("Helvetica", 10)
         tk.Label(parent, text=item, font=font, anchor="w")
         label = tk.Label(parent, text=value, font=font, anchor="w")
         label.grid(row=row, column=1, sticky="e")
-    def daysduration (self):
+        return label
+        
+    def cartchange(self, item, delta):
+        current = self.cart.get(item["id"], 0)
+        new = max(0, current + delta)
+        if new == 0:
+            self.cart.pop(item["id"], None)
+        else:
+            self.cart[item["id"]] = new
+        self.item_qty[item["id"]].config(text=str(new))
+        self.updatecart()
+    def daysduration(self):
         try:
             pickup = datetime.datetime.strptime(self.Pickup_date.get().strip(), "%d/%m/%Y").date()
             dropoff = datetime.datetime.strptime(self.Dropoff_date.get().strip(), "%d/%m/%Y").date()
-            daystotal = (dropoff-pickup).daystotal
+            daystotal = (dropoff - pickup).days
             return max(1, daystotal)
         except ValueError:
             return 1
@@ -171,7 +186,7 @@ class boltbyteproject():
         subtotal = 0.0
         for item_id, qty in self.cart.items():
             item = catalog_map[item_id]
-            line_cost = item["dayprice"] * qty * days
+            line_cost = item["dayprice"] * qty * daystotal
             subtotal += line_cost
             lines.append(f"{item['name']:<22} x{qty}  ${line_cost:>7.2f}")
 
