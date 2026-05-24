@@ -25,7 +25,7 @@ storeitems = [
 ]
 
 GST = 0.15
-BOLTBYTEFILE = os.path.join(os.path.dirname(__file__), "boltbyte_data.json")
+BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyte_data.json")
 
 def load_data():
     if os.path.exists(BOLTBYTEFILE):
@@ -41,12 +41,13 @@ class boltbyteproject():
     def __init__(self,root):
         self.data = load_data()
         
-        width = root.winfo_screenwidth()
-        height = root.winfo_screenheight()
+        #width = root.winfo_screenwidth()
+        #height = root.winfo_screenheight()
         
         self.root = root
         self.root.title = ("Bylt & Byte Tech Hire Interface")
-        self.root.geometry(f"{width}x{height}+0+0")
+        #self.root.geometry(f"{width}x{height}+0+0")
+        self.root.geometry("900x600")
         self.root.configure(bg="#FFFFFF")
         
         self.cart = {}
