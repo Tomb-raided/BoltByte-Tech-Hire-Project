@@ -32,7 +32,7 @@ def load_data():
         with open(BOLTBYTEFILE, "r") as f:
             return json.load(f)
     else:
-        return {"rentals": [], "returns": []}
+        return {"rentals": [], "returns": [], "receipt_id": {}}
 def save_data(data):
     with open(BOLTBYTEFILE, "w") as f:
         json.dump(data, f, indent=4)
@@ -45,7 +45,7 @@ class boltbyteproject():
         #height = root.winfo_screenheight()
         
         self.root = root
-        self.root.title = ("Bylt & Byte Tech Hire Interface")
+        self.root.title("Bolt & Byte Tech Hire Interface")
         #self.root.geometry(f"{width}x{height}+0+0")
         self.root.geometry("900x600")
         self.root.configure(bg="#FFFFFF")
@@ -121,7 +121,7 @@ class boltbyteproject():
         self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
         self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
         
-        tk.Button(right, text="Checkout",command=self.checkout ,pady=6).pack(fill="both",padx=(0,6))
+        tk.Button(right, text="Checkout",command=lambda: self.bill(record=self.checkout()) or None, pady=6).pack(fill="both",padx=(0,6))
         
         self.updatecart()
     
@@ -232,29 +232,83 @@ class boltbyteproject():
             })
         tax = subtotal * GST
         total = subtotal + tax 
-        order = {
-            "order_id": str(uuid.uuid4()),
+        receipt_id = str(uuid.uuid4())[:8].upper()
+        
+        record = {
+            "receipt_id": receipt_id,
             "customer_name": name_var,
             "pickup_date": self.Pickup_date.get().strip(),
             "dropoff_date": self.Dropoff_date.get().strip(),
+            "days_hired": daystotal,
             "items": order_items,
             "subtotal": subtotal,
             "tax": tax,
-            "total": total
+            "total": total,
+            "timestamp": datetime.datetime.now().isoformat()
         }
-        self.data["rentals"][order["order_id"]] = order
+        self.data["receipt_id"][receipt_id] = record
         save_data(self.data)
         
         for item_id in self.cart.keys():
             self.item_qty[item_id].config(text="0")
         self.cart.clear()
-        self.name_entry.delete(0, tk.END)
+        #self.name_entry.delete(0, tk.END)
         self.updatecart()
-        self.refresh_admin()
-        messagebox.showinfo("Order Placed", f"Thank you {name_var}! Your order has been placed.\nTotal: ${total:.2f}")
+        #self.refresh_admin()
+        return record
+        
+    def bill(self, record):
+        bill_window = tk.Toplevel(self.root)
+        bill_window.title("Rental Receipt")
+        bill_window.geometry("400x500")
+        
+        tk.Label(bill_window, text="Bolt & Byte Tech Hire", font=("Helvetica", 16, "bold")).pack(pady=10)
+        tk.Label(bill_window, text=f"Receipt ID: {record['receipt_id']}").pack()
+        tk.Label(bill_window, text=f"Date: {record['timestamp'][:10]}").pack()
+        tk.Label(bill_window, text="------------------------------").pack(pady=5)
+        tk.Label(bill_window, text=f"Customer: {record['customer_name']}").pack()
+        tk.Label(bill_window, text=f"Pickup Date: {record['pickup_date']}").pack()
+        tk.Label(bill_window, text=f"Dropoff Date: {record['dropoff_date']}").pack()
+        tk.Label(bill_window, text="Items Rented:", font=("Helvetica", 12, "bold")).pack(pady=10)
+
+        for item in record["items"]:
+            tk.Label(bill_window, text=f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}").pack(anchor="w", padx=20)
+
+        tk.Label(bill_window, text=f"Subtotal: ${record['subtotal']:.2f}").pack(pady=5)
+        tk.Label(bill_window, text=f"Tax ({int(GST*100)}%): ${record['tax']:.2f}").pack(pady=5)
+        tk.Label(bill_window, text=f"Total: ${record['total']:.2f}", font=("Helvetica", 12, "bold")).pack(pady=10)
+        
+        tk.Button(bill_window, text="Close", command=bill_window.destroy).pack(pady=10)
         
     def returnsUI(self):
+        receipt_id_search = tk.LabelFrame(self.returns, text="Search Rental Receipt", font=("Helvetica", 12, "bold"), bg="#000000", padx=6, pady=4)
+        receipt_id_search.pack(fill="x")
+        self.receipt_id_entry = tk.Entry(receipt_id_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
+        self.receipt_id_entry.grid(row=0, column=1, padx=6, pady=2)
+        tk.Button(receipt_id_search, text="Search", command=self.search_receipt, pady=6).grid(row=0, column=2, padx=6, pady=2)
         return
+    def search_receipt(self):
+        receipt_id = self.receipt_id_entry.get().strip()
+        receipt = self.data["receipt_id"].get(receipt_id)
+        if receipt:
+            details = f"Receipt ID: {receipt['receipt_id']}\nCustomer: {receipt['customer_name']}\nPickup: {receipt['pickup_date']}\nDropoff: {receipt['dropoff_date']}\nItems:\n"
+            for item in receipt["items"]:
+                details += f"  - {item['name']} x{item['quantity']} (${item['line_cost']:.2f})\n"
+            details += f"Subtotal: ${receipt['subtotal']:.2f}\nTax: ${receipt['tax']:.2f}\nTotal: ${receipt['total']:.2f}"
+            messagebox.showinfo("Rental Receipt", details)
+        else:
+            messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
+    def search_name(self):
+        name_search = self.name_entry.get().strip()
+        receipt = self.data["customer_name"].get(name_search)
+        if receipt:
+            details = f"Receipt ID: {receipt['receipt_id']}\nCustomer: {receipt['customer_name']}\nPickup: {receipt['pickup_date']}\nDropoff: {receipt['dropoff_date']}\nItems:\n"
+            for item in receipt["items"]:
+                details += f"  - {item['name']} x{item['quantity']} (${item['line_cost']:.2f})\n"
+            details += f"Subtotal: ${receipt['subtotal']:.2f}\nTax: ${receipt['tax']:.2f}\nTotal: ${receipt['total']:.2f}"
+            messagebox.showinfo("Rental Receipt", details)
+        else:
+            messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
     def adminUI(self):
         return
         
