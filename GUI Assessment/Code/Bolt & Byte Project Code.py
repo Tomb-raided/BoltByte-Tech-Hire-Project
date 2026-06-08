@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import datetime
+import time
 import json
 import os
 import uuid
@@ -29,13 +30,15 @@ BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyt
 
 def load_data():
     if os.path.exists(BOLTBYTEFILE):
-        with open(BOLTBYTEFILE, "r") as f:
-            return json.load(f)
-    else:
-        return {"rentals": [], "returns": [], "receipt_id": {}}
+        try:
+            with open(BOLTBYTEFILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"receipt":[],"receipt_id": {}}
 def save_data(data):
-    with open(BOLTBYTEFILE, "w") as f:
-        json.dump(data, f, indent=4)
+    with open(BOLTBYTEFILE, "w") as file:
+        json.dump(data, file, indent=4)
 
 class boltbyteproject():
     def __init__(self,root):
@@ -121,7 +124,7 @@ class boltbyteproject():
         self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
         self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
         
-        tk.Button(right, text="Checkout",command=lambda: self.bill(record=self.checkout()) or None, pady=6).pack(fill="both",padx=(0,6))
+        tk.Button(right, text="Checkout",command=lambda: self.bill(record=self.checkout()), pady=6).pack(fill="both",padx=(0,6))
         
         self.updatecart()
     
@@ -281,11 +284,17 @@ class boltbyteproject():
         tk.Button(bill_window, text="Close", command=bill_window.destroy).pack(pady=10)
         
     def returnsUI(self):
-        receipt_id_search = tk.LabelFrame(self.returns, text="Search Rental Receipt", font=("Helvetica", 12, "bold"), bg="#000000", padx=6, pady=4)
-        receipt_id_search.pack(fill="x")
+        receipt_id_search = tk.LabelFrame(self.returns, text="Search Rental Receipt", font=("Helvetica", 24, "bold"), bg="#000000", padx=6, pady=4)
+        receipt_id_search.pack(expand=True ,anchor="ne" ,fill="x")
         self.receipt_id_entry = tk.Entry(receipt_id_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
-        self.receipt_id_entry.grid(row=0, column=1, padx=6, pady=2)
-        tk.Button(receipt_id_search, text="Search", command=self.search_receipt, pady=6).grid(row=0, column=2, padx=6, pady=2)
+        self.receipt_id_entry.pack(side="left", padx=6, pady=2, expand=True, fill="x")
+        tk.Button(receipt_id_search, text="Search", command=self.search_receipt, pady=6).pack(side="right", padx=6, pady=2)
+        
+        lost_receipt_search = tk.LabelFrame(self.returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date",font=("Helvetica", 18, "bold"), bg="black")
+        lost_receipt_search.pack(expand=True, anchor="e",fill="x", pady=4)
+        self.name_entry = tk.Entry(lost_receipt_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
+        self.name_entry.pack(side="left", padx=6, pady=2, expand=True, fill="x")
+        tk.Button(lost_receipt_search, text="Search", command=self.search_name, pady=6).pack(side="right", padx=6, pady=2)
         return
     def search_receipt(self):
         receipt_id = self.receipt_id_entry.get().strip()
@@ -299,19 +308,18 @@ class boltbyteproject():
         else:
             messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
     def search_name(self):
-        name_search = self.name_entry.get().strip()
-        receipt = self.data["customer_name"].get(name_search)
-        if receipt:
-            details = f"Receipt ID: {receipt['receipt_id']}\nCustomer: {receipt['customer_name']}\nPickup: {receipt['pickup_date']}\nDropoff: {receipt['dropoff_date']}\nItems:\n"
-            for item in receipt["items"]:
-                details += f"  - {item['name']} x{item['quantity']} (${item['line_cost']:.2f})\n"
-            details += f"Subtotal: ${receipt['subtotal']:.2f}\nTax: ${receipt['tax']:.2f}\nTotal: ${receipt['total']:.2f}"
-            messagebox.showinfo("Rental Receipt", details)
-        else:
-            messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
+        name_search = self.name_entry.get().strip().lower()
+        for receipt_id, receipt in self.data['receipt_id'].items():
+            if receipt['customer_name'].lower() == name_search:
+                details = f"Receipt ID: {receipt['receipt_id']}\nCustomer: {receipt['customer_name']}\nPickup: {receipt['pickup_date']}\nDropoff: {receipt['dropoff_date']}\nItems:\n"
+                for item in receipt["items"]:
+                    details += f"  - {item['name']} x{item['quantity']} (${item['line_cost']:.2f})\n"
+                details += f"Subtotal: ${receipt['subtotal']:.2f}\nTax: ${receipt['tax']:.2f}\nTotal: ${receipt['total']:.2f}"
+                messagebox.showinfo("Rental Receipt", details)
+                return
+        messagebox.showerror("Not Found", "No receipt found with that customer name.")
     def adminUI(self):
-        return
-        
+        return  
             
 if __name__ == "__main__":
     root = tk.Tk()
