@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import datetime
-import time
 import json
 import os
 import uuid
@@ -31,14 +30,15 @@ BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyt
 def load_data():
     if os.path.exists(BOLTBYTEFILE):
         try:
-            with open(BOLTBYTEFILE, "r") as f:
-                return json.load(f)
+            with open(BOLTBYTEFILE, "r") as file:
+                return json.load(file)
         except Exception:
             pass
-    return {"receipt":[],"receipt_id": {}}
+    return {"user_data": {}}
+
 def save_data(data):
     with open(BOLTBYTEFILE, "w") as file:
-        json.dump(data, file, indent=4)
+        json.dump(data,file, indent=4)
 
 class boltbyteproject():
     def __init__(self,root):
@@ -104,11 +104,11 @@ class boltbyteproject():
         self.Daterow(Dates, "Pickup Date", self.Pickup_date,0)
         self.Daterow(Dates, "Dropoff Date", self.Dropoff_date,1)
         
-        Name = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="#FFFFFF", fg="gray", padx=6, pady=4)
-        Name.pack(fill="x", padx=(0,6))
+        customerName = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="#FFFFFF", fg="gray", padx=6, pady=4)
+        customerName.pack(fill="x", padx=(0,6))
         
         self.name_entry = tk.StringVar()
-        tk.Entry(Name, textvariable=self.name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1).pack(fill="x")
+        tk.Entry(customerName, textvariable=self.name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1).pack(fill="x")
         
         ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"),foreground="white", bg="#FFFFFF", fg="gray")
         ItemCart.pack(fill="x", padx=(0,6))
@@ -124,23 +124,20 @@ class boltbyteproject():
         self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
         self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
         
-        tk.Button(right, text="Checkout",command=lambda: self.bill(record=self.checkout()), pady=6).pack(fill="both",padx=(0,6))
+        tk.Button(right, text="Checkout",command=self.checkout, pady=6).pack(fill="both",padx=(0,6))
         
         self.updatecart()
     
     def itemrows(self, parent, item):
-        # Create outer frame for each item with fixed height and colored background
         frame = tk.Frame(parent, bg=item["colour"], height=60)
         frame.pack(fill="x", pady=3, padx=3)
         frame.propagate(False)
         
-        # Left side: item info (name and price)
         info = tk.Frame(frame, bg=item["colour"])
         info.pack(side="left", fill="both", expand=True, padx=5, pady=3)
         tk.Label(info, text=item["name"], font=("Helvetica", 12, "bold"), bg=item["colour"]).pack(anchor="w")
         tk.Label(info, text=f"${item['dayprice']:.2f}/day", font=("Helvetica", 10), bg=item["colour"]).pack(anchor="w")
         
-        # Right side: quantity controls (-, quantity display, +)
         qty_button = tk.Frame(frame, bg=item["colour"])
         qty_button.pack(side="right", padx=8, pady=3)
         
@@ -211,13 +208,13 @@ class boltbyteproject():
         self.Sales_tax.config(text=f"${tax:.2f}")
         self.Total_price.config(text=f"${total:.2f}")
     def checkout(self):
-        name_var = self.name_entry.get().strip()
-        if not name_var:
-            messagebox.showwarning("Name Field is empty"," Please enter a Name.")
-            return
+        name_var = self.name_entry.get()
+        if name_var == "":
+          messagebox.showwarning("Name Field is empty"," Please enter a Name.")
+          return
         if not self.cart:
-            messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
-            return
+           messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
+           return
 
         daystotal = self.daysduration()
         storeitemslist = {i["id"]: i for i in storeitems}
@@ -249,7 +246,7 @@ class boltbyteproject():
             "total": total,
             "timestamp": datetime.datetime.now().isoformat()
         }
-        self.data["receipt_id"][receipt_id] = record
+        self.data["user_data"][receipt_id] = record
         save_data(self.data)
         
         for item_id in self.cart.keys():
@@ -258,6 +255,7 @@ class boltbyteproject():
         #self.name_entry.delete(0, tk.END)
         self.updatecart()
         #self.refresh_admin()
+        self.bill(record)
         return record
         
     def bill(self, record):
@@ -292,32 +290,24 @@ class boltbyteproject():
         
         lost_receipt_search = tk.LabelFrame(self.returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date",font=("Helvetica", 18, "bold"), bg="black")
         lost_receipt_search.pack(expand=True, anchor="e",fill="x", pady=4)
-        self.name_entry = tk.Entry(lost_receipt_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
-        self.name_entry.pack(side="left", padx=6, pady=2, expand=True, fill="x")
+        self.name_entry_r = tk.Entry(lost_receipt_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
+        self.name_entry_r.pack(side="left", padx=6, pady=2, expand=True, fill="x")
         tk.Button(lost_receipt_search, text="Search", command=self.search_name, pady=6).pack(side="right", padx=6, pady=2)
         return
     def search_receipt(self):
-        receipt_id = self.receipt_id_entry.get().strip()
-        receipt = self.data["receipt_id"].get(receipt_id)
-        if receipt:
-            details = f"Receipt ID: {receipt['receipt_id']}\nCustomer: {receipt['customer_name']}\nPickup: {receipt['pickup_date']}\nDropoff: {receipt['dropoff_date']}\nItems:\n"
-            for item in receipt["items"]:
-                details += f"  - {item['name']} x{item['quantity']} (${item['line_cost']:.2f})\n"
-            details += f"Subtotal: ${receipt['subtotal']:.2f}\nTax: ${receipt['tax']:.2f}\nTotal: ${receipt['total']:.2f}"
-            messagebox.showinfo("Rental Receipt", details)
+        receipt_code = self.receipt_id_entry.get().strip()
+        receipt = self.data["user_data"]["receipt_id"]
+        if receipt == receipt_code:
+            self.bill(receipt_code)
         else:
             messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
-    def search_name(self):
-        name_search = self.name_entry.get().strip().lower()
-        for receipt_id, receipt in self.data['receipt_id'].items():
-            if receipt['customer_name'].lower() == name_search:
-                details = f"Receipt ID: {receipt['receipt_id']}\nCustomer: {receipt['customer_name']}\nPickup: {receipt['pickup_date']}\nDropoff: {receipt['dropoff_date']}\nItems:\n"
-                for item in receipt["items"]:
-                    details += f"  - {item['name']} x{item['quantity']} (${item['line_cost']:.2f})\n"
-                details += f"Subtotal: ${receipt['subtotal']:.2f}\nTax: ${receipt['tax']:.2f}\nTotal: ${receipt['total']:.2f}"
-                messagebox.showinfo("Rental Receipt", details)
-                return
-        messagebox.showerror("Not Found", "No receipt found with that customer name.")
+    def search_name(self,data):
+        name_search = self.name_entry_r.get().strip().lower()
+        name_receipt = self.data["reciept_id"]["customer_name"]
+        if name_receipt == name_receipt:
+            self.bill(name_receipt)
+        else:
+            messagebox.showerror("Not Found", "No receipt found with that customer name.")
     def adminUI(self):
         return  
             
