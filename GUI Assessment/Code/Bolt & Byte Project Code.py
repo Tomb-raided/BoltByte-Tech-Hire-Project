@@ -244,7 +244,8 @@ class boltbyteproject():
             "subtotal": subtotal,
             "tax": tax,
             "total": total,
-            "timestamp": datetime.datetime.now().isoformat()
+            "timestamp": datetime.datetime.now().isoformat(),
+            "Has_Returned": False
         }
         self.data["user_data"][receipt_id] = record
         save_data(self.data)
@@ -255,10 +256,10 @@ class boltbyteproject():
         #self.name_entry.delete(0, tk.END)
         self.updatecart()
         #self.refresh_admin()
-        self.bill(record)
+        self.checkoutbill(record)
         return record
         
-    def bill(self, record):
+    def checkoutbill(self, record):
         bill_window = tk.Toplevel(self.root)
         bill_window.title("Rental Receipt")
         bill_window.geometry("400x500")
@@ -273,7 +274,7 @@ class boltbyteproject():
         tk.Label(bill_window, text="Items Rented:", font=("Helvetica", 12, "bold")).pack(pady=10)
 
         for item in record["items"]:
-            tk.Label(bill_window, text=f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}").pack(anchor="w", padx=20)
+            tk.Label(bill_window, text=f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}").pack(anchor="center", padx=20)
 
         tk.Label(bill_window, text=f"Subtotal: ${record['subtotal']:.2f}").pack(pady=5)
         tk.Label(bill_window, text=f"Tax ({int(GST*100)}%): ${record['tax']:.2f}").pack(pady=5)
@@ -282,32 +283,64 @@ class boltbyteproject():
         tk.Button(bill_window, text="Close", command=bill_window.destroy).pack(pady=10)
         
     def returnsUI(self):
-        receipt_id_search = tk.LabelFrame(self.returns, text="Search Rental Receipt", font=("Helvetica", 24, "bold"), bg="#000000", padx=6, pady=4)
-        receipt_id_search.pack(expand=True ,anchor="ne" ,fill="x")
+        receipt_id_search = tk.LabelFrame(self.returns, text="Search Rental Receipt", font=("Helvetica", 24, "bold"), bg="black")
+        receipt_id_search.pack(anchor="n" ,fill="x",padx=6, pady=4)
+        receipt_id_box = tk.Frame(receipt_id_search)
+        receipt_id_box.pack(fill="x")
         self.receipt_id_entry = tk.Entry(receipt_id_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
         self.receipt_id_entry.pack(side="left", padx=6, pady=2, expand=True, fill="x")
         tk.Button(receipt_id_search, text="Search", command=self.search_receipt, pady=6).pack(side="right", padx=6, pady=2)
         
-        lost_receipt_search = tk.LabelFrame(self.returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date",font=("Helvetica", 18, "bold"), bg="black")
-        lost_receipt_search.pack(expand=True, anchor="e",fill="x", pady=4)
-        self.name_entry_r = tk.Entry(lost_receipt_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
-        self.name_entry_r.pack(side="left", padx=6, pady=2, expand=True, fill="x")
-        tk.Button(lost_receipt_search, text="Search", command=self.search_name, pady=6).pack(side="right", padx=6, pady=2)
+        forgot_receipt = tk.LabelFrame(self.returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date",font=("Helvetica", 18, "bold"), bg="black")
+        forgot_receipt.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        
+        forgot_name = tk.LabelFrame(forgot_receipt, text="Remeber the Name you used? Use this Box!",font=("Helvetica", 14, "bold"), bg="black")
+        forgot_name.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        self.name_entry_r = tk.Entry(forgot_name, font=("Helvetica", 10), width=36, relief="solid")
+        self.name_entry_r.pack(expand=True, side="left", padx=5, pady=2, fill="x")
+        tk.Button(forgot_name, text="Search", command=self.search_name, pady=6).pack(side="right", padx=6, pady=2)
+        
+        forgot_dates = tk.LabelFrame(forgot_receipt, text="Remember your Pickup/Dropoff Date? Use this Box!",font=("Helvetica", 14, "bold"), bg="black")
+        forgot_dates.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        self.date_pickup = tk.Entry(forgot_dates, font=("Helvetica", 10), width=36, relief="solid")
+        self.date_pickup.pack(side="left", padx=5, pady=20, expand=True, fill="x")
+        self.date_dropoff = tk.Entry(forgot_dates, font=("Helvetica", 10), width=36, relief="solid")
+        self.date_dropoff.pack(side="left", padx=5, pady=30, expand=True, fill="x")
+        tk.Button(forgot_dates, text="Search", command=self.search_dates, pady=6).pack(side="left", padx=6, pady=2)
         return
+    
     def search_receipt(self):
         receipt_code = self.receipt_id_entry.get().strip()
-        receipt = self.data["user_data"]["receipt_id"]
-        if receipt == receipt_code:
-            self.bill(receipt_code)
+        if receipt_code in self.data["user_data"]:
+            record = self.data["user_data"][receipt_code]
+            self.checkoutbill(record)
+            self.data["Has_Returned"] = True
+            save_data(self.data)
         else:
             messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
-    def search_name(self,data):
-        name_search = self.name_entry_r.get().strip().lower()
-        name_receipt = self.data["reciept_id"]["customer_name"]
-        if name_receipt == name_receipt:
-            self.bill(name_receipt)
+        
+    def search_name(self):
+        name_search = self.name_entry_r.get().strip()
+        for record in self.data["user_data"].values():
+            if record["customer_name"] == name_search:
+                self.checkoutbill(record)
+                self.data["Has_Returned"] = True
+                save_data(self.data)
+                return
         else:
             messagebox.showerror("Not Found", "No receipt found with that customer name.")
+        
+    def search_dates(self):
+        date_search_pickup = self.date_pickup.get()
+        date_search_dropoff = self.date_dropoff.get()
+        for record in self.data["user_data"].values():
+            if record["pickup_date"] == date_search_pickup and record["dropoff_date"] == date_search_dropoff:
+                self.checkoutbill(record)
+                self.data["Has_Returned"] = True
+                save_data(self.data)
+                return
+        else:
+            messagebox.showerror("Not Found", "No product hire with those dates")
     def adminUI(self):
         return  
             
