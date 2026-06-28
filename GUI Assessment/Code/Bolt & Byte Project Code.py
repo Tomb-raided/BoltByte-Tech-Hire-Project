@@ -17,55 +17,59 @@ storeitems = [
     {"id": "002","name":"Headphones","colour": "#CF5353","dayprice": 7.99},
     {"id": "003","name":"Mouse","colour": "#D9DC32","dayprice": 11.99},
     {"id": "004","name":"Gaming Keyboard","colour": "#91D131","dayprice": 14.99},
-    {"id": "005","name":"Gaming HeadphonesB","colour": "#33C882","dayprice": 11.99},
-    {"id": "006","name":"Gaming HeadphonesP","colour": "#35D9C6","dayprice": 12.99},
+    {"id": "005","name":"Gaming Headphones_Black","colour": "#33C882","dayprice": 11.99},
+    {"id": "006","name":"Gaming Headphones_Pink","colour": "#35D9C6","dayprice": 12.99},
     {"id": "007","name":"Gaming Mouse","colour": "#2797D7","dayprice": 14.99},
     {"id": "008","name":"XB1 Controller","colour": "#4B28CB","dayprice": 9.99},
     {"id": "009","name":"PS5 Controller","colour": "#DC26CA","dayprice": 9.99},
-    {"id": "010","name":"Dummy Item","colour": "#C92780","dayprice": 9.99},
 ]
 
 GST = 0.15
-BOLTBYTEFILE = os.path.join(os.path.dirname(__file__), "boltbyte_data.json")
+BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyte_data.json")
 
 def load_data():
     if os.path.exists(BOLTBYTEFILE):
-        with open(BOLTBYTEFILE, "r") as f:
-            return json.load(f)
-    else:
-        return {"rentals": [], "returns": []}
+        try:
+            with open(BOLTBYTEFILE, "r") as file:
+                return json.load(file)
+        except Exception:
+            pass
+    return {"user_data": {}}
+
 def save_data(data):
-    with open(BOLTBYTEFILE, "w") as f:
-        json.dump(data, f, indent=4)
+    with open(BOLTBYTEFILE, "w") as file:
+        json.dump(data,file, indent=4)
 
 class boltbyteproject():
     def __init__(self,root):
+        self.data = load_data()
         
-        width = root.winfo_screenwidth()
-        height = root.winfo_screenheight()
+        #width = root.winfo_screenwidth()
+        #height = root.winfo_screenheight()
         
         self.root = root
-        self.root.title = ("Bylt & Byte Tech Hire Interface")
-        self.root.geometry(f"{width}x{height}+0+0")
-        self.root.configure(bg="black")
+        self.root.title("Bolt & Byte Tech Hire Interface")
+        #self.root.geometry(f"{width}x{height}+0+0")
+        self.root.geometry("900x600")
+        self.root.configure(bg="#FFFFFF")
         
         self.cart = {}
         self.item_qty = {}
         
-        header = tk.Frame(root, bg="#CF7979")
+        header = tk.Frame(root, bg="#FFFFFF", height=80)
         header.pack(fill="x")
-        tk.Label(header, text="Bolt & Byte Tech Hire",font=("Helvetica", 25), fg="#6D96BE",bg="systemTransparent").pack()
+        tk.Label(header, text="Bolt & Byte Tech Hire",font=("Helvetica", 25)).pack()
         
         style = ttk.Style()
-        style.configure("TNotebook", bg="gray",borderwith="0")
+        style.configure("TNotebook", bg="#FFFFFF",borderwith="0")
         style.configure("TNotebook.tab",)
         
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(expand = True, fill= 'both', padx=10, pady=10)
 
-        self.rentals = tk.Frame(self.notebook, highlightbackground="black", highlightthickness=2)
-        self.returns = tk.Frame(self.notebook, highlightbackground="black", highlightthickness=2)
-        self.admin = tk.Frame(self.notebook, highlightbackground="black", highlightthickness=2)
+        self.rentals = tk.Frame(self.notebook, highlightbackground="#FFFFFF", highlightthickness=2)
+        self.returns = tk.Frame(self.notebook, highlightbackground="#FFFFFF", highlightthickness=2)
+        self.admin = tk.Frame(self.notebook, highlightbackground="#FFFFFF", highlightthickness=2)
         
         self.notebook.add(self.rentals, text="Rentals")
         self.notebook.add(self.returns, text="Returns")
@@ -76,22 +80,22 @@ class boltbyteproject():
         self.adminUI()
         
     def rentalsUI(self):
-        outer = tk.Frame(self.rentals, bg="#000000")
+        outer = tk.Frame(self.rentals, bg="#FFFFFF")
         outer.pack(expand=True, fill="both", padx=10, pady=10)
         
-        left = tk.Frame(outer, bg="#000000", width=300)
+        left = tk.Frame(outer, bg="#FFFFFF", width=500)
         left.pack(side="left", fill="y")
         left.pack_propagate(False)
         
-        tk.Label(left, text="Hireable Equipment",font=("Helvetica", 15, "bold"), fg="white", bg="black").pack(pady=6)
+        tk.Label(left, text="Hireable Equipment",font=("Helvetica", 15, "bold"), bg="#FFFFFF").pack(pady=6)
         
         for item in storeitems:
             self.itemrows(left, item)
             
-        right = tk.Frame(outer)
+        right = tk.Frame(outer, bg="#FFFFFF")
         right.pack(side="right", fill="y", expand=True, padx=(12,0))
         
-        Dates = tk.LabelFrame(right,text="Rental Dates", font=("Helvetica", 12, "bold"), bg="black", fg="gray", padx=6, pady=4)
+        Dates = tk.LabelFrame(right,text="Rental Dates", font=("Helvetica", 12, "bold"), bg="#FFFFFF", padx=6, pady=4)
         Dates.pack(fill="x", padx=(0,6))
         
         self.Pickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
@@ -100,19 +104,19 @@ class boltbyteproject():
         self.Daterow(Dates, "Pickup Date", self.Pickup_date,0)
         self.Daterow(Dates, "Dropoff Date", self.Dropoff_date,1)
         
-        Name = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="black", fg="gray", padx=6, pady=4)
-        Name.pack(fill="x", padx=(0,6))
+        customerName = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="#FFFFFF", fg="gray", padx=6, pady=4)
+        customerName.pack(fill="x", padx=(0,6))
         
         self.name_entry = tk.StringVar()
-        tk.Entry(Name, textvariable=self.name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1).pack(fill="x")
+        tk.Entry(customerName, textvariable=self.name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1).pack(fill="x")
         
-        ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"), bg="black", fg="gray")
+        ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"),foreground="white", bg="#FFFFFF", fg="gray")
         ItemCart.pack(fill="x", padx=(0,6))
         
-        self.CartText = tk.Text(ItemCart,font=("Courier", 10), state="disabled", bg="white", relief="solid", bd=1, height=8)
+        self.CartText = tk.Text(ItemCart,font=("Courier", 10,), state="disabled", bg="#FFFFFF", relief="solid", bd=1, height=8)
         self.CartText.pack(expand=True, fill="both")
         
-        totalprice = tk.Frame(right, bg="gray")
+        totalprice = tk.Frame(right, bg="#FFFFFF")
         totalprice.pack(fill="x")
         
         self.days_hired = self.row_totals(totalprice, "Duration:", "0 Days", 0)
@@ -120,23 +124,20 @@ class boltbyteproject():
         self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
         self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
         
-        tk.Button(right, text="Checkout",command=self.checkout ,pady=6).pack(fill="both",padx=(0,6))
+        tk.Button(right, text="Checkout",command=self.checkout, pady=6).pack(fill="both",padx=(0,6))
         
         self.updatecart()
     
     def itemrows(self, parent, item):
-        # Create outer frame for each item with fixed height and colored background
         frame = tk.Frame(parent, bg=item["colour"], height=60)
         frame.pack(fill="x", pady=3, padx=3)
         frame.propagate(False)
         
-        # Left side: item info (name and price)
         info = tk.Frame(frame, bg=item["colour"])
         info.pack(side="left", fill="both", expand=True, padx=5, pady=3)
         tk.Label(info, text=item["name"], font=("Helvetica", 12, "bold"), bg=item["colour"]).pack(anchor="w")
         tk.Label(info, text=f"${item['dayprice']:.2f}/day", font=("Helvetica", 10), bg=item["colour"]).pack(anchor="w")
         
-        # Right side: quantity controls (-, quantity display, +)
         qty_button = tk.Frame(frame, bg=item["colour"])
         qty_button.pack(side="right", padx=8, pady=3)
         
@@ -148,7 +149,7 @@ class boltbyteproject():
         tk.Button(qty_button, text="−", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg="white", fg=item["colour"], cursor="hand2", command=lambda i=item: self.cartchange(i, -1)).grid(row=0, column=0, padx=(0, 2))
         
     def Daterow(self, parent, label,var, row):
-        tk.Label(parent, text=label, font=("Helvetica", 10), bg="#f8f8f8", width=12, anchor="w").grid(row=row, column=0, sticky="w", pady=2)
+        tk.Label(parent, text=label, font=("Helvetica", 10), bg="#FFFFFF", width=12, anchor="w").grid(row=row, column=0, sticky="w", pady=2)
         daterowe = tk.Entry(parent,textvariable=var, font=("Helvetica", 10),width=12, relief="solid", bd=1)
         daterowe.grid(row=row, column=1, padx=6, pady=2)
         daterowe.bind("<FocusOut>", lambda ev: self.updatecart())
@@ -207,13 +208,13 @@ class boltbyteproject():
         self.Sales_tax.config(text=f"${tax:.2f}")
         self.Total_price.config(text=f"${total:.2f}")
     def checkout(self):
-        name_var = self.name_entry.get().strip()
-        if not name_var:
-            messagebox.showwarning("Name Field is empty"," Please enter a Name.")
-            return
+        name_var = self.name_entry.get()
+        if name_var == "":
+          messagebox.showwarning("Name Field is empty"," Please enter a Name.")
+          return
         if not self.cart:
-            messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
-            return
+           messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
+           return
 
         daystotal = self.daysduration()
         storeitemslist = {i["id"]: i for i in storeitems}
@@ -231,37 +232,219 @@ class boltbyteproject():
             })
         tax = subtotal * GST
         total = subtotal + tax 
-        order = {
-            "order_id": str(uuid.uuid4()),
+        receipt_id = str(uuid.uuid4())[:8].upper()
+        
+        record = {
+            "receipt_id": receipt_id,
             "customer_name": name_var,
             "pickup_date": self.Pickup_date.get().strip(),
             "dropoff_date": self.Dropoff_date.get().strip(),
+            "days_hired": daystotal,
             "items": order_items,
             "subtotal": subtotal,
             "tax": tax,
-            "total": total
+            "total": total,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "Has_Returned": False
         }
-        self.data["rentals"][order["order_id"]] = order
+        self.data["user_data"][receipt_id] = record
         save_data(self.data)
         
         for item_id in self.cart.keys():
             self.item_qty[item_id].config(text="0")
         self.cart.clear()
-        self.name_entry.set("")
+        #self.name_entry.delete(0, tk.END)
         self.updatecart()
-        self.refresh_admin()
-        messagebox.showinfo("Order Placed", f"Thank you {name_var}! Your order has been placed.\nTotal: ${total:.2f}")
+        #self.refresh_admin()
+        self.checkoutbill(record)
+        return record
         
-    
+    def checkoutbill(self, record):
+        bill_window = tk.Toplevel(self.root)
+        bill_window.title("Rental Receipt")
+        bill_window.geometry("400x500")
+        
+        tk.Label(bill_window, text="Bolt & Byte Tech Hire", font=("Helvetica", 16, "bold")).pack(pady=10)
+        tk.Label(bill_window, text=f"Receipt ID: {record['receipt_id']}").pack()
+        tk.Label(bill_window, text=f"Date: {record['timestamp'][:10]}").pack()
+        tk.Label(bill_window, text="------------------------------").pack(pady=5)
+        tk.Label(bill_window, text=f"Customer: {record['customer_name']}").pack()
+        tk.Label(bill_window, text=f"Pickup Date: {record['pickup_date']}").pack()
+        tk.Label(bill_window, text=f"Dropoff Date: {record['dropoff_date']}").pack()
+        tk.Label(bill_window, text="Items Rented:", font=("Helvetica", 12, "bold")).pack(pady=10)
 
+        for item in record["items"]:
+            tk.Label(bill_window, text=f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}").pack(anchor="center", padx=20)
+
+        tk.Label(bill_window, text=f"Subtotal: ${record['subtotal']:.2f}").pack(pady=5)
+        tk.Label(bill_window, text=f"Tax ({int(GST*100)}%): ${record['tax']:.2f}").pack(pady=5)
+        tk.Label(bill_window, text=f"Total: ${record['total']:.2f}", font=("Helvetica", 12, "bold")).pack(pady=10)
         
+        tk.Button(bill_window, text="Close", command=bill_window.destroy).pack(pady=10)
         
     def returnsUI(self):
-        return
-    def adminUI(self):
-        return
+        receipt_id_search = tk.LabelFrame(self.returns, text="Search Rental Receipt", font=("Helvetica", 24, "bold"), bg="black")
+        receipt_id_search.pack(anchor="n" ,fill="x",padx=6, pady=4)
+        receipt_id_box = tk.Frame(receipt_id_search)
+        receipt_id_box.pack(fill="x")
+        self.receipt_id_entry = tk.Entry(receipt_id_search, font=("Helvetica", 10), width=36, relief="solid", bd=1)
+        self.receipt_id_entry.pack(side="left", padx=6, pady=2, expand=True, fill="x")
+        tk.Button(receipt_id_search, text="Search", command=self.search_receipt, pady=6).pack(side="right", padx=6, pady=2)
         
+        forgot_receipt = tk.LabelFrame(self.returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date",font=("Helvetica", 18, "bold"), bg="black")
+        forgot_receipt.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        
+        forgot_name = tk.LabelFrame(forgot_receipt, text="Remeber the Name you used? Use this Box!",font=("Helvetica", 14, "bold"), bg="black")
+        forgot_name.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        self.name_entry_r = tk.Entry(forgot_name, font=("Helvetica", 10), width=36, relief="solid")
+        self.name_entry_r.pack(expand=True, side="left", padx=5, pady=2, fill="x")
+        tk.Button(forgot_name, text="Search", command=self.search_name, pady=6).pack(side="right", padx=6, pady=2)
+        
+        forgot_dates = tk.LabelFrame(forgot_receipt, text="Remember your Pickup/Dropoff Date? Use this Box!",font=("Helvetica", 14, "bold"), bg="black")
+        forgot_dates.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        self.date_pickup = tk.Entry(forgot_dates, font=("Helvetica", 10), width=36, relief="solid")
+        self.date_pickup.pack(side="left", padx=5, pady=20, expand=True, fill="x")
+        self.date_dropoff = tk.Entry(forgot_dates, font=("Helvetica", 10), width=36, relief="solid")
+        self.date_dropoff.pack(side="left", padx=5, pady=30, expand=True, fill="x")
+        tk.Button(forgot_dates, text="Search", command=self.search_dates, pady=6).pack(side="left", padx=6, pady=2)
+        return
+    
+    def search_receipt(self):
+        receipt_code = self.receipt_id_entry.get().strip()
+        if receipt_code in self.data["user_data"]:
+            record = self.data["user_data"][receipt_code]
+            self.checkoutbill(record)
+            self.data["Has_Returned"] = True
+            save_data(self.data)
+        else:
+            messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
+        
+    def search_name(self):
+        name_search = self.name_entry_r.get().strip()
+        for record in self.data["user_data"].values():
+            if record["customer_name"] == name_search:
+                self.checkoutbill(record)
+                self.data["Has_Returned"] = True
+                save_data(self.data)
+                return
+        else:
+            messagebox.showerror("Not Found", "No receipt found with that customer name.")
+        
+    def search_dates(self):
+        date_search_pickup = self.date_pickup.get()
+        date_search_dropoff = self.date_dropoff.get()
+        for record in self.data["user_data"].values():
+            if record["pickup_date"] == date_search_pickup and record["dropoff_date"] == date_search_dropoff:
+                self.checkoutbill(record)
+                self.data["Has_Returned"] = True
+                save_data(self.data)
+                return
+        else:
+            messagebox.showerror("Not Found", "No product hire with those dates")
+    def adminUI(self):
+        outer = tk.Frame(self.admin)
+        outer.pack(expand=True, fill="both", padx=10, pady=10)
+        
+        left = tk.Frame(outer, width=350, bg="#000000")
+        left.pack(side="left", fill="y")
+        left.pack_propagate(False)
+        
+        tk.Label(left, text="Rental Records", font=("Helvetica", 15, "bold")).pack(pady=6)
+        record_listbox = tk.Frame(left)
+        record_listbox.pack(expand=True, fill="both", padx=6, pady=6)
+        
+        scrollbar = tk.Scrollbar(record_listbox)
+        scrollbar.pack(side="right", fill="y")
+        
+        self.record_list = tk.Listbox(record_listbox, font=("Helvetica", 12), yscrollcommand=scrollbar.set)
+        self.record_list.pack(side="left", expand=True, fill="both")
+        
+        scrollbar.configure(command=self.record_list.yview)
+        self.record_list.bind("<<ListboxSelect>>", self.record_show)
+        
+        right = tk.Frame(outer)
+        right.pack(side="right", fill="both", expand=True, padx=(12,0))
+        
+        self.record_details_title = tk.Label(right, text="Receipt details", font=("Helvetica", 10), bg="#FFFFFF", relief="solid", bd=1)
+        self.record_details_title.pack(anchor="w")
+        
+        self.record_details_content = tk.Label(right,text="",font=("Helvetica", 10), bg="#FFFFFF", relief="solid", bd=1)
+        self.record_details_content.pack(anchor="w", expand=True, fill="both", padx=6, pady=6)
+        
+        tk.Label(right, text="Items Hired", font=("Helvetica", 12), bg="#FFFFFF").pack(pady=10)
+        
+        item_frame = tk.Frame(right, bg="#FFFFFF", relief="solid", bd=1)
+        item_frame.pack(expand=True, fill="both", padx=6, pady=6)
+        
+        item_scrollbar = tk.Scrollbar(item_frame)
+        item_scrollbar.pack(side="right", fill="y")
+        
+        self.item_list = tk.Listbox(item_frame, font=("Helvetica", 10), yscrollcommand=item_scrollbar.set)
+        self.item_list.pack(side="left", expand=True, fill="both")
+        
+        item_scrollbar.configure(command=self.item_list.yview)
+        
+        totals = tk.Label(right, text="", font=("Helvetica", 12, "bold"), bg="#FFFFFF")
+        totals.pack(anchor="w", pady=8)
+        
+        tk.Button(right, text="Copy record to Clipboard", command=self.copy_record).pack(pady=4)
+        tk.Button(right, text="Delete Record", command=self.delete_record).pack(pady=4)
+        
+        
+        self.selected_receipt_ID = None
+        self.record_refresh()
+        
+    def record_refresh(self):
+        self.record_list.delete(0, tk.END)
+        self.selected_receipt_ID = []
+        for receipt_id, record in self.data["user_data"].items():
+            self.record_list.insert(tk.END, f" #{receipt_id} {record['customer_name']} {record['pickup_date']} to {record['dropoff_date']}")
+            self.selected_receipt_ID.append(receipt_id)
+        return
+    def delete_record(self):
+        delete_id = self.selected_receipt_ID[self.record_list.curselection()[0]]
+        confirm = messagebox.askyesno("Confirm Deletion", "Are you sure you want to delete this record? This action cannot be undone.")
+        if confirm:
+            self.data["user_data"].pop(delete_id, None)
+            save_data(self.data)
+            self.record_refresh()
+        return
+    def copy_record(self):
+        if self.selected_receipt_ID:
+            selected_record = self.record_list.curselection()
+            if selected_record:
+                receipt_id = self.selected_receipt_ID[selected_record[0]]
+                record = self.data["user_data"][receipt_id]
+                record_text = json.dumps(record, indent=4)
+                self.root.clipboard_clear()
+                self.root.clipboard_append(record_text)
+                messagebox.showinfo("Copied", "Record copied to clipboard.")
+            else:
+                messagebox.showwarning("No Selection", "Please select a record to copy.")
+        else:
+            messagebox.showwarning("No Records", "There are no records to copy.")
+    def record_show(self, event):
+        selected_record = self.record_list.curselection()
+        if selected_record:
+            receipt_id = self.selected_receipt_ID[selected_record[0]]
+            record = self.data["user_data"][receipt_id]
+            details_text = f"Customer: {record['customer_name']}\nPickup Date: {record['pickup_date']}\nDropoff Date: {record['dropoff_date']}\nDays Hired: {record['days_hired']}\nSubtotal: ${record['subtotal']:.2f}\nTax: ${record['tax']:.2f}\nTotal: ${record['total']:.2f}\nReturned: {'Yes' if record.get('Has_Returned', False) else 'No'}"
+            self.record_details_content.config(text=details_text)
             
+            self.item_list.delete(0, tk.END)
+            for item in record["items"]:
+                self.item_list.insert(tk.END, f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}")
+    def staff_list(self):
+        return
+    
+        
+        
+        
+        
+        
+        
+        
+        
 if __name__ == "__main__":
     root = tk.Tk()
     app = boltbyteproject(root)
