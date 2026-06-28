@@ -58,7 +58,7 @@ class boltbyteproject():
         
         header = tk.Frame(root, bg="#FFFFFF", height=80)
         header.pack(fill="x")
-        tk.Label(header, text="Bolt & Byte Tech Hire",font=("Helvetica", 25), fg="#6D90B3",bg="systemTransparent").pack()
+        tk.Label(header, text="Bolt & Byte Tech Hire",font=("Helvetica", 25)).pack()
         
         style = ttk.Style()
         style.configure("TNotebook", bg="#FFFFFF",borderwith="0")
@@ -342,8 +342,109 @@ class boltbyteproject():
         else:
             messagebox.showerror("Not Found", "No product hire with those dates")
     def adminUI(self):
-        return  
+        outer = tk.Frame(self.admin)
+        outer.pack(expand=True, fill="both", padx=10, pady=10)
+        
+        left = tk.Frame(outer, width=350, bg="#000000")
+        left.pack(side="left", fill="y")
+        left.pack_propagate(False)
+        
+        tk.Label(left, text="Rental Records", font=("Helvetica", 15, "bold")).pack(pady=6)
+        record_listbox = tk.Frame(left)
+        record_listbox.pack(expand=True, fill="both", padx=6, pady=6)
+        
+        scrollbar = tk.Scrollbar(record_listbox)
+        scrollbar.pack(side="right", fill="y")
+        
+        self.record_list = tk.Listbox(record_listbox, font=("Helvetica", 12), yscrollcommand=scrollbar.set)
+        self.record_list.pack(side="left", expand=True, fill="both")
+        
+        scrollbar.configure(command=self.record_list.yview)
+        self.record_list.bind("<<ListboxSelect>>", self.record_show)
+        
+        right = tk.Frame(outer)
+        right.pack(side="right", fill="both", expand=True, padx=(12,0))
+        
+        self.record_details_title = tk.Label(right, text="Receipt details", font=("Helvetica", 10), bg="#FFFFFF", relief="solid", bd=1)
+        self.record_details_title.pack(anchor="w")
+        
+        self.record_details_content = tk.Label(right,text="",font=("Helvetica", 10), bg="#FFFFFF", relief="solid", bd=1)
+        self.record_details_content.pack(anchor="w", expand=True, fill="both", padx=6, pady=6)
+        
+        tk.Label(right, text="Items Hired", font=("Helvetica", 12), bg="#FFFFFF").pack(pady=10)
+        
+        item_frame = tk.Frame(right, bg="#FFFFFF", relief="solid", bd=1)
+        item_frame.pack(expand=True, fill="both", padx=6, pady=6)
+        
+        item_scrollbar = tk.Scrollbar(item_frame)
+        item_scrollbar.pack(side="right", fill="y")
+        
+        self.item_list = tk.Listbox(item_frame, font=("Helvetica", 10), yscrollcommand=item_scrollbar.set)
+        self.item_list.pack(side="left", expand=True, fill="both")
+        
+        item_scrollbar.configure(command=self.item_list.yview)
+        
+        totals = tk.Label(right, text="", font=("Helvetica", 12, "bold"), bg="#FFFFFF")
+        totals.pack(anchor="w", pady=8)
+        
+        tk.Button(right, text="Copy record to Clipboard", command=self.copy_record).pack(pady=4)
+        tk.Button(right, text="Delete Record", command=self.delete_record).pack(pady=4)
+        
+        
+        self.selected_receipt_ID = None
+        self.record_refresh()
+        
+    def record_refresh(self):
+        self.record_list.delete(0, tk.END)
+        self.selected_receipt_ID = []
+        for receipt_id, record in self.data["user_data"].items():
+            self.record_list.insert(tk.END, f" #{receipt_id} {record['customer_name']} {record['pickup_date']} to {record['dropoff_date']}")
+            self.selected_receipt_ID.append(receipt_id)
+        return
+    def delete_record(self):
+        delete_id = self.selected_receipt_ID[self.record_list.curselection()[0]]
+        confirm = messagebox.askyesno("Confirm Deletion", "Are you sure you want to delete this record? This action cannot be undone.")
+        if confirm:
+            self.data["user_data"].pop(delete_id, None)
+            save_data(self.data)
+            self.record_refresh()
+        return
+    def copy_record(self):
+        if self.selected_receipt_ID:
+            selected_record = self.record_list.curselection()
+            if selected_record:
+                receipt_id = self.selected_receipt_ID[selected_record[0]]
+                record = self.data["user_data"][receipt_id]
+                record_text = json.dumps(record, indent=4)
+                self.root.clipboard_clear()
+                self.root.clipboard_append(record_text)
+                messagebox.showinfo("Copied", "Record copied to clipboard.")
+            else:
+                messagebox.showwarning("No Selection", "Please select a record to copy.")
+        else:
+            messagebox.showwarning("No Records", "There are no records to copy.")
+    def record_show(self, event):
+        selected_record = self.record_list.curselection()
+        if selected_record:
+            receipt_id = self.selected_receipt_ID[selected_record[0]]
+            record = self.data["user_data"][receipt_id]
+            details_text = f"Customer: {record['customer_name']}\nPickup Date: {record['pickup_date']}\nDropoff Date: {record['dropoff_date']}\nDays Hired: {record['days_hired']}\nSubtotal: ${record['subtotal']:.2f}\nTax: ${record['tax']:.2f}\nTotal: ${record['total']:.2f}\nReturned: {'Yes' if record.get('Has_Returned', False) else 'No'}"
+            self.record_details_content.config(text=details_text)
             
+            self.item_list.delete(0, tk.END)
+            for item in record["items"]:
+                self.item_list.insert(tk.END, f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}")
+    def staff_list(self):
+        return
+    
+        
+        
+        
+        
+        
+        
+        
+        
 if __name__ == "__main__":
     root = tk.Tk()
     app = boltbyteproject(root)
