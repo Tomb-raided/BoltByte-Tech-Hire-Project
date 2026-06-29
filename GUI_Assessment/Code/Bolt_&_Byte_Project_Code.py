@@ -4,24 +4,15 @@ import datetime
 import json
 import os
 import uuid
-
-#imageexist = True
-#try:
-#    from PIL import Image, ImageTK
-#except:
-#    imageexist = False
-#    messagebox.showerror("Error, library PIL failed to Initialise, please read the README.MD file and restart the Program")
-    
-storeitems = [
-    {"id": "001","name":"Keyboard","colour": "#E94343","dayprice": 9.99},
-    {"id": "002","name":"Headphones","colour": "#CF5353","dayprice": 7.99},
-    {"id": "003","name":"Mouse","colour": "#D9DC32","dayprice": 11.99},
-    {"id": "004","name":"Gaming Keyboard","colour": "#91D131","dayprice": 14.99},
-    {"id": "005","name":"Gaming Headphones_Black","colour": "#33C882","dayprice": 11.99},
-    {"id": "006","name":"Gaming Headphones_Pink","colour": "#35D9C6","dayprice": 12.99},
-    {"id": "007","name":"Gaming Mouse","colour": "#2797D7","dayprice": 14.99},
-    {"id": "008","name":"XB1 Controller","colour": "#4B28CB","dayprice": 9.99},
-    {"id": "009","name":"PS5 Controller","colour": "#DC26CA","dayprice": 9.99},
+storeitems = [{"id": "001","name":"Keyboard","colour": "#E94343","dayprice": 9.99},
+    {"id": "002", "name": "Headphones", "colour": "#CF5353", "dayprice": 7.99},
+    {"id": "003", "name": "Mouse", "colour": "#D9DC32", "dayprice": 11.99}, 
+    {"id": "004", "name": "Gaming Keyboard", "colour": "#91D131", "dayprice": 14.99},
+    {"id": "005", "name": "Gaming Headphones_Black", "colour": "#33C882", "dayprice": 11.99},
+    {"id": "006", "name": "Gaming Headphones_Pink", "colour": "#35D9C6", "dayprice": 12.99},
+    {"id": "007", "name": "Gaming Mouse", "colour": "#2797D7", "dayprice": 14.99},
+    {"id": "008", "name": "XB1 Controller", "colour": "#4B28CB", "dayprice": 9.99},
+    {"id": "009", "name": "PS5 Controller", "colour": "#DC26CA", "dayprice": 9.99},
 ]
 
 GST = 0.15
@@ -44,12 +35,8 @@ class boltbyteproject():
     def __init__(self,root):
         self.data = load_data()
         
-        #width = root.winfo_screenwidth()
-        #height = root.winfo_screenheight()
-        
         self.root = root
         self.root.title("Bolt & Byte Tech Hire Interface")
-        #self.root.geometry(f"{width}x{height}+0+0")
         self.root.geometry("900x600")
         self.root.configure(bg="#FFFFFF")
         
@@ -162,32 +149,32 @@ class boltbyteproject():
         return label
         
     def cartchange(self, item, delta):
-        current = self.cart.get(item["id"], 0)
-        new = max(0, current + delta)
-        if new == 0:
+        currentcart = self.cart.get(item["id"], 0)
+        new_cart = max(0, currentcart + delta)
+        if new_cart == 0:
             self.cart.pop(item["id"], None)
         else:
-            self.cart[item["id"]] = new
-        self.item_qty[item["id"]].config(text=str(new))
+            self.cart[item["id"]] = new_cart
+        self.item_qty[item["id"]].config(text=str(new_cart))
         self.updatecart()
     def daysduration(self):
         try:
             pickup = datetime.datetime.strptime(self.Pickup_date.get().strip(), "%d/%m/%Y").date()
             dropoff = datetime.datetime.strptime(self.Dropoff_date.get().strip(), "%d/%m/%Y").date()
-            daystotal = (dropoff - pickup).days
-            return max(1, daystotal)
+            days_total = (dropoff - pickup).days
+            return max(1, days_total)
         except ValueError:
             return 1
     
     def updatecart(self):
-        daystotal = self.daysduration()
+        days_total = self.daysduration()
         catalog_map = {i["id"]: i for i in storeitems}
 
         lines = []
         subtotal = 0.0
         for item_id, qty in self.cart.items():
             item = catalog_map[item_id]
-            line_cost = item["dayprice"] * qty * daystotal
+            line_cost = item["dayprice"] * qty * days_total
             subtotal += line_cost
             lines.append(f"{item['name']:<22} x{qty}  ${line_cost:>7.2f}")
 
@@ -203,7 +190,7 @@ class boltbyteproject():
             self.CartText.insert(tk.END, "  No items in cart.")
         self.CartText.config(state="disabled")
 
-        self.days_hired.config(text=f"{daystotal} day{'s' if daystotal != 1 else ''}")
+        self.days_hired.config(text=f"{days_total} day{'s' if days_total != 1 else ''}")
         self.price_subtotal.config(text=f"${subtotal:.2f}")
         self.Sales_tax.config(text=f"${tax:.2f}")
         self.Total_price.config(text=f"${total:.2f}")
@@ -216,13 +203,13 @@ class boltbyteproject():
            messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
            return
 
-        daystotal = self.daysduration()
+        days_total = self.daysduration()
         storeitemslist = {i["id"]: i for i in storeitems}
         order_items = []
         subtotal = 0.0
         for item_id, qty in self.cart.items():
             item = storeitemslist[item_id]
-            line_cost = item["dayprice"] * qty * daystotal
+            line_cost = item["dayprice"] * qty * days_total
             subtotal += line_cost
             order_items.append({
                 "id": item_id,
@@ -239,7 +226,7 @@ class boltbyteproject():
             "customer_name": name_var,
             "pickup_date": self.Pickup_date.get().strip(),
             "dropoff_date": self.Dropoff_date.get().strip(),
-            "days_hired": daystotal,
+            "days_hired": days_total,
             "items": order_items,
             "subtotal": subtotal,
             "tax": tax,
@@ -423,6 +410,7 @@ class boltbyteproject():
                 messagebox.showwarning("No Selection", "Please select a record to copy.")
         else:
             messagebox.showwarning("No Records", "There are no records to copy.")
+            
     def record_show(self, event):
         selected_record = self.record_list.curselection()
         if selected_record:
@@ -436,16 +424,10 @@ class boltbyteproject():
                 self.item_list.insert(tk.END, f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}")
     def staff_list(self):
         return
-    
-        
-        
-        
-        
-        
-        
-        
-        
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = boltbyteproject(root)
     root.mainloop()
+    
