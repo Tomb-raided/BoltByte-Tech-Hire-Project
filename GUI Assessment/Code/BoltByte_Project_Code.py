@@ -4,7 +4,8 @@ import datetime
 import json
 import os
 import uuid
-storeitems = [{"id": "001","name":"Keyboard","colour": "#E94343","dayprice": 9.99},
+storeitems = [
+    {"id": "001" ,"name": "Keyboard", "colour": "#E94343", "dayprice": 9.99},
     {"id": "002", "name": "Headphones", "colour": "#CF5353", "dayprice": 7.99},
     {"id": "003", "name": "Mouse", "colour": "#D9DC32", "dayprice": 11.99}, 
     {"id": "004", "name": "Gaming Keyboard", "colour": "#91D131", "dayprice": 14.99},
@@ -37,26 +38,25 @@ class boltbyteproject():
         
         self.root = root
         self.root.title("Bolt & Byte Tech Hire Interface")
-        self.root.geometry("900x600")
-        self.root.configure(bg="#FFFFFF")
+        self.root.geometry("935x900")
         
         self.cart = {}
         self.item_qty = {}
         
-        header = tk.Frame(root, bg="#FFFFFF", height=80)
+        header = tk.Frame(root, height=80)
         header.pack(fill="x")
         tk.Label(header, text="Bolt & Byte Tech Hire",font=("Helvetica", 25)).pack()
         
         style = ttk.Style()
-        style.configure("TNotebook", bg="#FFFFFF",borderwith="0")
+        style.configure("TNotebook",borderwith="0")
         style.configure("TNotebook.tab",)
         
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(expand = True, fill= 'both', padx=10, pady=10)
 
-        self.rentals = tk.Frame(self.notebook, highlightbackground="#FFFFFF", highlightthickness=2)
-        self.returns = tk.Frame(self.notebook, highlightbackground="#FFFFFF", highlightthickness=2)
-        self.admin = tk.Frame(self.notebook, highlightbackground="#FFFFFF", highlightthickness=2)
+        self.rentals = tk.Frame(self.notebook, highlightthickness=2)
+        self.returns = tk.Frame(self.notebook, highlightthickness=2)
+        self.admin = tk.Frame(self.notebook, highlightthickness=2)
         
         self.notebook.add(self.rentals, text="Rentals")
         self.notebook.add(self.returns, text="Returns")
@@ -67,22 +67,22 @@ class boltbyteproject():
         self.adminUI()
         
     def rentalsUI(self):
-        outer = tk.Frame(self.rentals, bg="#FFFFFF")
+        outer = tk.Frame(self.rentals)
         outer.pack(expand=True, fill="both", padx=10, pady=10)
         
-        left = tk.Frame(outer, bg="#FFFFFF", width=500)
+        left = tk.Frame(outer, bg="#000000", width=500)
         left.pack(side="left", fill="y")
         left.pack_propagate(False)
         
-        tk.Label(left, text="Hireable Equipment",font=("Helvetica", 15, "bold"), bg="#FFFFFF").pack(pady=6)
+        tk.Label(left, text="Hireable Equipment",font=("Helvetica", 15, "bold"), bg="#000000").pack(pady=6)
         
         for item in storeitems:
             self.itemrows(left, item)
             
-        right = tk.Frame(outer, bg="#FFFFFF")
+        right = tk.Frame(outer, bg="#000000")
         right.pack(side="right", fill="y", expand=True, padx=(12,0))
         
-        Dates = tk.LabelFrame(right,text="Rental Dates", font=("Helvetica", 12, "bold"), bg="#FFFFFF", padx=6, pady=4)
+        Dates = tk.LabelFrame(right,text="Rental Dates", font=("Helvetica", 12, "bold"), bg="#000000", padx=6, pady=4)
         Dates.pack(fill="x", padx=(0,6))
         
         self.Pickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
@@ -91,25 +91,25 @@ class boltbyteproject():
         self.Daterow(Dates, "Pickup Date", self.Pickup_date,0)
         self.Daterow(Dates, "Dropoff Date", self.Dropoff_date,1)
         
-        customerName = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="#FFFFFF", fg="gray", padx=6, pady=4)
+        customerName = tk.LabelFrame(right,name="customer Name" ,font=("Helvetica", 12, "bold"), bg="#000000", fg="gray", padx=6, pady=4)
         customerName.pack(fill="x", padx=(0,6))
         
         self.name_entry = tk.StringVar()
         tk.Entry(customerName, textvariable=self.name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1).pack(fill="x")
         
-        ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"),foreground="white", bg="#FFFFFF", fg="gray")
+        ItemCart = tk.LabelFrame(right, text="Cart", font=("Helvetica", 12, "bold"),foreground="#000000", bg="#000000", fg="gray")
         ItemCart.pack(fill="x", padx=(0,6))
         
-        self.CartText = tk.Text(ItemCart,font=("Courier", 10,), state="disabled", bg="#FFFFFF", relief="solid", bd=1, height=8)
+        self.CartText = tk.Text(ItemCart,font=("Courier", 10,), state="disabled", relief="solid", bd=1, height=8)
         self.CartText.pack(expand=True, fill="both")
         
-        totalprice = tk.Frame(right, bg="#FFFFFF")
-        totalprice.pack(fill="x")
+        total_price_frame = tk.Frame(right, bg="#000000")
+        total_price_frame.pack(fill="x")
         
-        self.days_hired = self.row_totals(totalprice, "Duration:", "0 Days", 0)
-        self.price_subtotal = self.row_totals(totalprice, "Subtotal:", "$0.00", 1)
-        self.Sales_tax = self.row_totals(totalprice,f"({int(GST*100)}%):","$0.00",2)
-        self.Total_price = self.row_totals(totalprice,"Total Price:","0.00",3)
+        self.days_hired = self.row_totals(total_price_frame, "Duration:", "0 Days", 0)
+        self.price_subtotal = self.row_totals(total_price_frame, "Subtotal:", "$0.00", 1)
+        self.Sales_tax = self.row_totals(total_price_frame,f"({int(GST*100)}%):","$0.00",2)
+        self.Total_price = self.row_totals(total_price_frame,"Total Price:","$0.00",3)
         
         tk.Button(right, text="Checkout",command=self.checkout, pady=6).pack(fill="both",padx=(0,6))
         
@@ -136,7 +136,7 @@ class boltbyteproject():
         tk.Button(qty_button, text="−", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg="white", fg=item["colour"], cursor="hand2", command=lambda i=item: self.cartchange(i, -1)).grid(row=0, column=0, padx=(0, 2))
         
     def Daterow(self, parent, label,var, row):
-        tk.Label(parent, text=label, font=("Helvetica", 10), bg="#FFFFFF", width=12, anchor="w").grid(row=row, column=0, sticky="w", pady=2)
+        tk.Label(parent, text=label, font=("Helvetica", 10), bg="#000000", width=12, anchor="w").grid(row=row, column=0, sticky="w", pady=2)
         daterowe = tk.Entry(parent,textvariable=var, font=("Helvetica", 10),width=12, relief="solid", bd=1)
         daterowe.grid(row=row, column=1, padx=6, pady=2)
         daterowe.bind("<FocusOut>", lambda ev: self.updatecart())
@@ -239,10 +239,14 @@ class boltbyteproject():
         
         for item_id in self.cart.keys():
             self.item_qty[item_id].config(text="0")
+            
         self.cart.clear()
-        #self.name_entry.delete(0, tk.END)
         self.updatecart()
-        #self.refresh_admin()
+        
+        self.name_entry.set("")
+
+        
+        self.record_refresh()
         self.checkoutbill(record)
         return record
         
@@ -352,15 +356,15 @@ class boltbyteproject():
         right = tk.Frame(outer)
         right.pack(side="right", fill="both", expand=True, padx=(12,0))
         
-        self.record_details_title = tk.Label(right, text="Receipt details", font=("Helvetica", 10), bg="#FFFFFF", relief="solid", bd=1)
+        self.record_details_title = tk.Label(right, text="Receipt details", font=("Helvetica", 10), bg="#000000", relief="solid", bd=1)
         self.record_details_title.pack(anchor="w")
         
-        self.record_details_content = tk.Label(right,text="",font=("Helvetica", 10), bg="#FFFFFF", relief="solid", bd=1)
+        self.record_details_content = tk.Label(right,text="",font=("Helvetica", 10), bg="#000000", relief="solid", bd=1)
         self.record_details_content.pack(anchor="w", expand=True, fill="both", padx=6, pady=6)
         
-        tk.Label(right, text="Items Hired", font=("Helvetica", 12), bg="#FFFFFF").pack(pady=10)
+        tk.Label(right, text="Items Hired", font=("Helvetica", 12), bg="#000000").pack(pady=10)
         
-        item_frame = tk.Frame(right, bg="#FFFFFF", relief="solid", bd=1)
+        item_frame = tk.Frame(right, bg="#000000", relief="solid", bd=1)
         item_frame.pack(expand=True, fill="both", padx=6, pady=6)
         
         item_scrollbar = tk.Scrollbar(item_frame)
@@ -371,7 +375,7 @@ class boltbyteproject():
         
         item_scrollbar.configure(command=self.item_list.yview)
         
-        totals = tk.Label(right, text="", font=("Helvetica", 12, "bold"), bg="#FFFFFF")
+        totals = tk.Label(right, text="", font=("Helvetica", 12, "bold"), bg="#000000")
         totals.pack(anchor="w", pady=8)
         
         tk.Button(right, text="Copy record to Clipboard", command=self.copy_record).pack(pady=4)
