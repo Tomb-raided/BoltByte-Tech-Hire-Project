@@ -52,27 +52,27 @@ class boltbyteproject():
         
         self.Item_amount = {}
         
-        Main_frame = tk.Frame(root, height=80)
+        Main_frame = ttk.Frame(root)
         
-        Main_frame.pack(fill="x")
+        Main_frame.pack(fill="both")
         
-        Main_title = tk.Label(Main_frame, text="Bolt & Byte Tech Hire",font=("Helvetica", 25))
+        Main_title = ttk.Label(Main_frame, text="Bolt & Byte Tech Hire",font=("Helvetica", 25))
         Main_title.pack()
         
         style = ttk.Style()
-        
+
         style.configure("TNotebook",borderwith="0")
-        
-        style.configure("TNotebook.tab",)
+        style.theme_use("clam")
+
         
         self.Notebook = ttk.Notebook(root)
         self.Notebook.pack(expand = True, fill= 'both', padx=10, pady=10)
 
-        self.Rentals = tk.Frame(self.Notebook, highlightthickness=2)
+        self.Rentals = ttk.Frame(self.Notebook)
         
-        self.Returns = tk.Frame(self.Notebook, highlightthickness=2)
+        self.Returns = ttk.Frame(self.Notebook)
         
-        self.Admin = tk.Frame(self.Notebook, highlightthickness=2)
+        self.Admin = ttk.Frame(self.Notebook)
         
         self.Notebook.add(self.Rentals, text="Rentals")
         
@@ -87,26 +87,26 @@ class boltbyteproject():
         self.Admin_UI()
         
     def Rentals_UI(self):
-        Rentals_outer = tk.Frame(self.Rentals)
+        Rentals_outer = ttk.Frame(self.Rentals)
         
         Rentals_outer.pack(expand=True, fill="both", padx=10, pady=10)
         
-        Rentals_left = tk.Frame(Rentals_outer, bg="#000000", width=500)
+        Rentals_left = ttk.Frame(Rentals_outer,width=500)
         
         Rentals_left.pack(side="left", fill="y")
         
         Rentals_left.pack_propagate(False)
         
-        Item_rows_title = tk.Label(Rentals_left, text="Hireable Equipment",font=("Helvetica", 15, "bold"), bg="#000000")
+        Item_rows_title = ttk.Label(Rentals_left, text="Hireable Equipment",font=("Helvetica", 15, "bold"))
         Item_rows_title.pack(pady=6)
         
         for item in Store_items:
             self.Item_rows(Rentals_left, item)
             
-        Rentals_right = tk.Frame(Rentals_outer, bg="#000000")
+        Rentals_right = ttk.Frame(Rentals_outer)
         Rentals_right.pack(side="right", fill="y", expand=True, padx=(12,0))
         
-        Dates = tk.LabelFrame(Rentals_right,text="Rental Dates", font=("Helvetica", 12, "bold"), bg="#000000", padx=6, pady=4)
+        Dates = ttk.Labelframe(Rentals_right,text="Rental Dates")
         Dates.pack(fill="x", padx=(0,6))
         
         self.Pickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
@@ -115,28 +115,28 @@ class boltbyteproject():
         self.Date_row(Dates, "Pickup Date", self.Pickup_date,0)
         self.Date_row(Dates, "Dropoff Date", self.Dropoff_date,1)
         
-        Customer_name = tk.LabelFrame(Rentals_right, name="customer Name" ,font=("Helvetica", 12, "bold"), bg="#000000", fg="gray", padx=6, pady=4)
+        Customer_name = ttk.LabelFrame(Rentals_right, name="customer Name")
         Customer_name.pack(fill="x", padx=(0,6))
         
         self.Name_entry = tk.StringVar()
-        Rentals_name_entry = tk.Entry(Customer_name, textvariable=self.Name_entry, font=("Helvetica", 12), width=24, relief="raised",bd=1)
+        Rentals_name_entry = ttk.Entry(Customer_name, textvariable=self.Name_entry, font=("Helvetica", 12), width=24)
         Rentals_name_entry.pack(fill="x")
         
-        Item_cart = tk.LabelFrame(Rentals_right, text="Cart", font=("Helvetica", 12, "bold"),foreground="#000000", bg="#000000", fg="gray")
+        Item_cart = ttk.LabelFrame(Rentals_right, text="Cart")
         Item_cart.pack(fill="x", padx=6)
         
-        self.Cart_text = tk.Text(Item_cart,font=("Courier", 10), relief="solid", bd=1, height=8)
+        self.Cart_text = tk.Text(Item_cart,font=("Courier", 10), relief="solid", bd=1, height=8,bg="#dcdad5",fg="#000000")
         self.Cart_text.pack(expand=True, fill="both")
         
-        Total_price_frame = tk.Frame(Rentals_right, bg="#000000")
+        Total_price_frame = ttk.Frame(Rentals_right)
         Total_price_frame.pack(fill="x")
         
         self.Days_hired = self.row_totals(Total_price_frame, "Duration:", "0 Days", 0)
         self.Price_subtotal = self.row_totals(Total_price_frame, "Subtotal:", "$0.00", 1)
-        self.Sales_tax = self.row_totals(Total_price_frame,f"({int(GST*100)}%):","$0.00",2)
+        self.Sales_tax = self.row_totals(Total_price_frame,"Sales Tax(15%):","$0.00",2)
         self.Total_price = self.row_totals(Total_price_frame,"Total Price:","$0.00",3)
         
-        Rentals_Checkout = tk.Button(Rentals_right, text="Checkout",command=self.checkout, pady=6)
+        Rentals_Checkout = ttk.Button(Rentals_right, text="Checkout",command=self.checkout)
         Rentals_Checkout.pack(fill="both",padx=(0,6))
         
         self.Update_cart()
@@ -158,32 +158,32 @@ class boltbyteproject():
         Item_rows_button = tk.Frame(Item_rows_frame, bg=item["colour"])
         Item_rows_button.pack(side="right", padx=8, pady=3)
         
-        Item_rows_label = tk.Label(Item_rows_button, text="0", font=("Helvetica", 12, "bold"), fg="white", bg=item["colour"], width=2, anchor="center")
+        Item_rows_label = tk.Label(Item_rows_button, text="0", font=("Helvetica", 12, "bold"), fg="black", bg=item["colour"], width=2, anchor="center")
         Item_rows_label.grid(row=0, column=1, pady=2)
         self.Item_amount[item["id"]] = Item_rows_label
         
-        Item_rows_add = tk.Button(Item_rows_button, text="+", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg="white", fg=item["colour"], command=lambda i=item: self.Cart_change(i, 1))
+        Item_rows_add = tk.Button(Item_rows_button, text="+", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg=item["colour"], fg=item["colour"], command=lambda i=item: self.Cart_change(i, 1))
         Item_rows_add.grid(row=0, column=2, padx=(2, 0))
         
-        Item_rows_minus = tk.Button(Item_rows_button, text="−", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg="white", fg=item["colour"], command=lambda i=item: self.Cart_change(i, -1))
+        Item_rows_minus = tk.Button(Item_rows_button, text="−", width=2, font=("Helvetica", 9, "bold"), relief="flat", bg=item["colour"], fg=item["colour"], command=lambda i=item: self.Cart_change(i, -1))
         Item_rows_minus.grid(row=0, column=0, padx=(0, 2))
         
     def Date_row(self, parent, label,var, row):
         
-        Date_row_tital = tk.Label(parent, text=label, font=("Helvetica", 10), bg="#000000", width=12, anchor="w")
-        Date_row_tital.grid(row=row, column=0, sticky="w", pady=2)
+        Date_row_title = ttk.Label(parent, text=label, font=("Helvetica", 10), width=12, anchor="w")
+        Date_row_title.grid(row=row, column=0, padx=6, pady=2)
         
-        Date_row_entry = tk.Entry(parent,textvariable=var, font=("Helvetica", 10),width=12, relief="solid", bd=1)
+        Date_row_entry = ttk.Entry(parent,textvariable=var, font=("Helvetica", 10),width=12,)
         Date_row_entry.grid(row=row, column=1, padx=6, pady=2)
         
         Date_row_entry.bind("<FocusOut>", lambda run: self.Update_cart())
         
     def row_totals(self, parent, item, value,row):
         
-        Row_totals_item = tk.Label(parent, text=item, font=("Helvetica", 10), anchor="w")
+        Row_totals_item = ttk.Label(parent, text=item, font=("Helvetica", 10), anchor="w")
+        Row_totals_item.grid(row=row, column=0, sticky="e")
         
-        
-        Row_totals_cost = tk.Label(parent, text=value, font=("Helvetica", 10), anchor="w")
+        Row_totals_cost = ttk.Label(parent, text=value, font=("Helvetica", 10), anchor="w")
         Row_totals_cost.grid(row=row, column=1, sticky="e")
         
         return Row_totals_cost
@@ -300,90 +300,94 @@ class boltbyteproject():
         Bill_window.title("Rental Receipt")
         Bill_window.geometry("400x500")
         
-        Bill_title = tk.Label(Bill_window, text="Bolt & Byte Tech Hire", font=("Helvetica", 16, "bold"))
+        Bill_title = ttk.Label(Bill_window, text="Bolt & Byte Tech Hire", font=("Helvetica", 16, "bold"))
         Bill_title.pack(pady=10)
         
-        Bill_receiptID =tk.Label(Bill_window, text=f"Receipt ID: {record['receipt_id']}")
+        Bill_receiptID =ttk.Label(Bill_window, text=f"Receipt ID: {record['receipt_id']}")
         Bill_receiptID.pack()
         
-        Bill_timestamp = tk.Label(Bill_window, text=f"Date: {record['timestamp'][:10]}")
+        Bill_timestamp = ttk.Label(Bill_window, text=f"Date: {record['timestamp'][:10]}")
         Bill_timestamp.pack()
         
-        Bill_linebreak = tk.Label(Bill_window, text="------------------------------")
+        Bill_linebreak = ttk.Label(Bill_window, text="------------------------------")
         Bill_linebreak.pack(pady=5)
         
-        Bill_C_name = tk.Label(Bill_window, text=f"Customer: {record['customer_name']}")
+        Bill_C_name = ttk.Label(Bill_window, text=f"Customer: {record['customer_name']}")
         Bill_C_name.pack()
         
-        Bill_P_date = tk.Label(Bill_window, text=f"Pickup Date: {record['pickup_date']}")
+        Bill_P_date = ttk.Label(Bill_window, text=f"Pickup Date: {record['pickup_date']}")
         Bill_P_date.pack()
         
-        Bill_D_date = tk.Label(Bill_window, text=f"Dropoff Date: {record['dropoff_date']}")
+        Bill_D_date = ttk.Label(Bill_window, text=f"Dropoff Date: {record['dropoff_date']}")
         Bill_D_date.pack()
         
-        Bill_items_header = tk.Label(Bill_window, text="Items Rented:", font=("Helvetica", 12, "bold"))
+        Bill_items_header = ttk.Label(Bill_window, text="Items Rented:", font=("Helvetica", 12, "bold"))
         Bill_items_header.pack(pady=10)
 
         for item in record["items"]:
-            Bill_items = tk.Label(Bill_window, text=f"{item['name']} x{item['quantity']} - ${item['Line_cost']}")
+            Bill_items = ttk.Label(Bill_window, text=f"{item['name']} x{item['quantity']} - ${item['line_cost']}")
             Bill_items.pack(anchor="center", padx=20)
 
-        Bill_subtotal = tk.Label(Bill_window, text=f"Subtotal: ${record['subtotal']}")
+        Bill_subtotal = ttk.Label(Bill_window, text=f"Subtotal: ${record['subtotal']}")
         Bill_subtotal.pack(pady=5)
         
-        Bill_Tax = tk.Label(Bill_window, text=f"Tax ({int(GST*100)}%): ${record['tax']}")
+        Bill_Tax = ttk.Label(Bill_window, text=f"Tax ({int(GST*100)}%): ${record['tax']}")
         Bill_Tax.pack(pady=5)
         
-        Bill_total = tk.Label(Bill_window, text=f"Total: ${record['total']}", font=("Helvetica", 12, "bold"))
+        Bill_total = ttk.Label(Bill_window, text=f"Total: ${record['total']}", font=("Helvetica", 12, "bold"))
         Bill_total.pack(pady=10)
         
-        Bill_close = tk.Button(Bill_window, text="Close", command=Bill_window.destroy)
+        Bill_close = ttk.Button(Bill_window, text="Close", command=Bill_window.destroy)
         Bill_close.pack(pady=10)
         
     def Returns_UI(self):
-        Receipt_frame = tk.LabelFrame(self.Returns, text="Search Rental Receipt", font=("Helvetica", 24, "bold"), bg="black")
+        Receipt_frame = ttk.LabelFrame(self.Returns, text="Search Rental Receipt")
         Receipt_frame.pack(anchor="n" ,fill="x",padx=6, pady=4)
         
-        Receipt_ID_frame = tk.Frame(Receipt_frame)
+        Receipt_ID_frame = ttk.Frame(Receipt_frame)
         Receipt_ID_frame.pack(fill="x")
         
-        self.Receipt_ID_entry = tk.Entry(Receipt_ID_frame, font=("Helvetica", 10), width=36, relief="solid", bd=1)
+        self.Receipt_ID_entry = ttk.Entry(Receipt_ID_frame, font=("Helvetica", 10), width=36)
         self.Receipt_ID_entry.pack(side="left", padx=6, pady=2, expand=True, fill="x")
         
-        tk.Button(Receipt_ID_frame, text="Search", command=self.Search_receipt, pady=6).pack(side="right", padx=6, pady=2)
+        ttk.Button(Receipt_ID_frame, text="Search", command=self.Search_receipt).pack(side="right", padx=6, pady=2)
         
-        Receipt_forget_frame = tk.LabelFrame(self.Returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date",font=("Helvetica", 18, "bold"), bg="black")
-        Receipt_forget_frame.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
+        Receipt_forget_frame = ttk.LabelFrame(self.Returns, text="Forgot your Receipt? Use your Name or Pickup/Dropoff Date")
+        Receipt_forget_frame.pack(expand=True, anchor="center",fill="x",padx=6, pady=4)
         
-        Receipt_name = tk.LabelFrame(Receipt_forget_frame, text="Remeber the Name you used? Use this Box!",font=("Helvetica", 14, "bold"), bg="black")
+        Receipt_name = ttk.LabelFrame(Receipt_forget_frame, text="Remeber the Name you used? Use this Box!",)
         Receipt_name.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
         
-        self.Receipt_name_entry = tk.Entry(Receipt_name, font=("Helvetica", 10), width=36, relief="solid")
+        self.Receipt_name_entry = ttk.Entry(Receipt_name, font=("Helvetica", 10), width=36)
         self.Receipt_name_entry.pack(expand=True, side="left", padx=5, pady=2, fill="x")
         
-        tk.Button(Receipt_name, text="Search", command=self.Search_name, pady=6).pack(side="right", padx=6, pady=2)
+        ttk.Button(Receipt_name, text="Search", command=self.Search_name,).pack(side="right", padx=6, pady=2)
         
-        Receipts_dates = tk.LabelFrame(Receipt_forget_frame, text="Remember your Pickup/Dropoff Date? Use this Box!",font=("Helvetica", 14, "bold"), bg="black")
+        Receipts_dates = ttk.LabelFrame(Receipt_forget_frame, text="Remember your Pickup/Dropoff Date? Use this Box!",)
         Receipts_dates.pack(expand=True, anchor="n",fill="x",padx=6, pady=4)
         
-        self.Receipts_dates_pickup = tk.Entry(Receipts_dates, font=("Helvetica", 10), width=36, relief="solid")
+        self.Receipts_dates_pickup = ttk.Entry(Receipts_dates, font=("Helvetica", 10), width=36)
         self.Receipts_dates_pickup.pack(side="left", padx=5, pady=20, expand=True, fill="x")
         
-        self.Receipts_dates_dropoff = tk.Entry(Receipts_dates, font=("Helvetica", 10), width=36, relief="solid")
+        self.Receipts_dates_dropoff = ttk.Entry(Receipts_dates, font=("Helvetica", 10), width=36)
         self.Receipts_dates_dropoff.pack(side="left", padx=5, pady=30, expand=True, fill="x")
         
-        tk.Button(Receipts_dates, text="Search", command=self.Search_dates, pady=6).pack(side="left", padx=6, pady=2)
+        ttk.Button(Receipts_dates, text="Search", command=self.Search_dates).pack(side="left", padx=6, pady=2)
         return
     
     def Search_receipt(self):
-        Receipt_ID = self.Receipt_ID_entry.get().strip()
-        if Receipt_ID in self.data["user_data"]:
-            record = self.data["user_data"][Receipt_ID]
-            self.Checkout_bill(record)
-            self.data["user_data"]["Has_Returned"] = True
-            save_data(self.data)
-        else:
+        Receipt_id = self.Receipt_ID_entry.get().strip()
+        if Receipt_id in self.data["user_data"] and self.data["user_data"]["Has_Returned"] == "false":
+                record = self.data["user_data"][Receipt_id]
+                self.Checkout_bill(record)
+                self.data["user_data"]["Has_Returned"] = "true"
+                save_data(self.data)
+        elif Receipt_id not in self.data["user_data"]:
             messagebox.showerror("Not Found", "No receipt found with that Receipt ID.")
+        elif self.data["user_data"][Receipt_id]["Has_Returned"] == "true":
+            messagebox.showerror("This Receipt has already been returned")
+        else:
+            messagebox.showerror("Unknown or Unexpected Error","Contact your administrator for support")
         
     def Search_name(self):
         Name_search = self.Receipt_name_entry.get().strip()
@@ -428,19 +432,19 @@ class boltbyteproject():
         #self.Login_button = tk.Button(self.Staff_login_window, text="Confirm Password", command=self.Login_process)
         #self.Login_button.place(relx=0.5,rely=0.50,anchor="center")
 
-        self.Admin_UI_outer = tk.Frame(self.Admin)
+        self.Admin_UI_outer = ttk.Frame(self.Admin)
         self.Admin_UI_outer.pack(expand=True, fill="both", padx=10, pady=10)
         
-        Admin_UI_left = tk.Frame(self.Admin_UI_outer, width=350, bg="#000000")
+        Admin_UI_left = ttk.Frame(self.Admin_UI_outer, width=350,)
         Admin_UI_left.pack(side="left", fill="y")
         Admin_UI_left.pack_propagate(False)
         
-        tk.Label(Admin_UI_left, text="Rental Records", font=("Helvetica", 15, "bold")).pack(pady=6)
+        ttk.Label(Admin_UI_left, text="Rental Records", font=("Helvetica", 15, "bold")).pack(pady=6)
         
-        Admin_record_listbox = tk.Frame(Admin_UI_left)
+        Admin_record_listbox = ttk.Frame(Admin_UI_left)
         Admin_record_listbox.pack(expand=True, fill="both", padx=6, pady=6)
         
-        Admin_scrollbar = tk.Scrollbar(Admin_record_listbox)
+        Admin_scrollbar = ttk.Scrollbar(Admin_record_listbox)
         Admin_scrollbar.pack(side="right", fill="y")
         
         self.Admin_record_list = tk.Listbox(Admin_record_listbox, font=("Helvetica", 12), yscrollcommand=Admin_scrollbar.set)
@@ -449,21 +453,22 @@ class boltbyteproject():
         Admin_scrollbar.configure(command=self.Admin_record_list.yview)
         self.Admin_record_list.bind("<<ListboxSelect>>", self.Record_show)
         
-        Admin_right = tk.Frame(self.Admin_UI_outer)
+        Admin_right = ttk.Frame(self.Admin_UI_outer)
         Admin_right.pack(side="right", fill="both", expand=True, padx=(12,0))
         
-        self.Admin_record_title = tk.Label(Admin_right, text="Receipt details", font=("Helvetica", 10), bg="#000000", relief="solid", bd=1)
+        self.Admin_record_title = ttk.Label(Admin_right, text="Receipt details", font=("Helvetica", 10))
         self.Admin_record_title.pack(anchor="w")
         
-        self.Admin_record_details = tk.Label(Admin_right,text="",font=("Helvetica", 10), bg="#000000", relief="solid", bd=1)
+        self.Admin_record_details = ttk.Label(Admin_right,text="",font=("Helvetica", 10),relief="solid")
         self.Admin_record_details.pack(anchor="w", expand=True, fill="both", padx=6, pady=6)
         
-        tk.Label(Admin_right, text="Items Hired", font=("Helvetica", 12), bg="#000000").pack(pady=10)
+        Admin_item_hired = ttk.Label(Admin_right, text="Items Hired", font=("Helvetica", 12))
+        Admin_item_hired.pack(pady=10)
         
-        Admin_item_frame = tk.Frame(Admin_right, bg="#000000", relief="solid", bd=1)
+        Admin_item_frame = ttk.Frame(Admin_right, relief="solid")
         Admin_item_frame.pack(expand=True, fill="both", padx=6, pady=6)
         
-        Admin_item_scrollbar = tk.Scrollbar(Admin_item_frame)
+        Admin_item_scrollbar = ttk.Scrollbar(Admin_item_frame)
         Admin_item_scrollbar.pack(side="right", fill="y")
         
         self.Admin_item_list = tk.Listbox(Admin_item_frame, font=("Helvetica", 10), yscrollcommand=Admin_item_scrollbar.set)
@@ -471,11 +476,11 @@ class boltbyteproject():
         
         Admin_item_scrollbar.configure(command=self.Admin_item_list.yview)
         
-        Admin_totals = tk.Label(Admin_right, text="", font=("Helvetica", 12, "bold"), bg="#000000")
+        Admin_totals = ttk.Label(Admin_right, text="", font=("Helvetica", 12, "bold"),)
         Admin_totals.pack(anchor="w", pady=8)
         
-        tk.Button(Admin_right, text="Copy record to Clipboard", command=self.Copy_record).pack(pady=4)
-        tk.Button(Admin_right, text="Delete Record", command=self.Delete_record).pack(pady=4)
+        ttk.Button(Admin_right, text="Copy record to Clipboard", command=self.Copy_record).pack(pady=4)
+        ttk.Button(Admin_right, text="Delete Record", command=self.Delete_record).pack(pady=4)
         
         # self.Staff_login_window.tkraise()
         # Part of the commented out Login page.
@@ -523,7 +528,7 @@ class boltbyteproject():
             
             self.Admin_item_list.delete(0, tk.END)
             for item in record["items"]:
-                self.Admin_item_list.insert(tk.END, f"{item['name']} x{item['quantity']} - ${item['Line_cost']:.2f}")
+                self.Admin_item_list.insert(tk.END, f"{item['name']} x{item['quantity']} - ${item['line_cost']:.2f}")
     # This def was the underlying logic for the password login, the place_forget() does not update the elements under it thus leading to a page refresh needed, this seemed unideal and was scrapped.    
     #def Login_process(self):
     #    if self.Login_password_check.get() == adminpassword:
