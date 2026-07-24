@@ -1,16 +1,26 @@
+#The Tkinter library is used to create the UI elements of the program, it is imported as tk to shorten the length of some lines of code
 import tkinter as tk
-
+#I specifically import the messagebox and ttk modules because...
+#The ttk module is because certain elements in ttk have a module name of TButton while tk has them as button.
+#Aswell as this ttk theming isn't compatible with tk modules which make each tk module need individual themeing.
+#messagebox was imported because when looking for why it wouldn't work with tk.messagebox i found i could,
+#Just import the specific module from tk without having to use and additial declarations.
 from tkinter import ttk, messagebox
-
+#I use the datetime library to check the date and have the dropoff date and pickup date automatically fill for one day
+#I also use the library to make sure the user cannot input a dropoff date into the past, giving a negative dayprice.
 import datetime
-
+#The json library contains the functions I needed to add storing and reading data in a json file
 import json
-
+#I imported the os library because when looking at ways to have a flexible filepath it kept coming up
+#As a library that has this function.
 import os
-
+#The uuid library allows for my program to generate a random string of charactors to be used as an individual
+#Identifier for receipts, allowing for users of the same name but differnet hire dates to be stored.
 import uuid
 
-
+#This STORE_ITEMS constant is a list of the items on the store/rentals page of the program.
+#An indefinite amount of items can be added as long as they follow the following template
+#{"id": "000", "name": "ITEM_NAME", "colour": "COLOURHEXCODE", "dayprice": 0.00},
 STORE_ITEMS = [
     {"id": "001" ,"name": "Keyboard", "colour": "#E94343", "dayprice": 9.99},
     {"id": "002", "name": "Headphones", "colour": "#CF5353", "dayprice": 7.99},
@@ -22,47 +32,63 @@ STORE_ITEMS = [
     {"id": "008", "name": "XB1 Controller", "colour": "#4B28CB", "dayprice": 9.99},
     {"id": "009", "name": "PS5 Controller", "colour": "#DC26CA", "dayprice": 9.99},
 ]
-
+#This GST constant is 0.15 to act as 15% when calculating the taxed amount and the total
 GST = 0.15
+#The BOLTBYTEFILE constant is a file path for the boltbyte_data.json file.
 BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyte_data.json")
 #adminpassword = str("TestPassword")
 def load_data():
     '''When called the def will attempt to call the boltbyte_data.json file, and if it doesn't exist it will create a new file named such.'''
     if os.path.exists(BOLTBYTEFILE):
+        #This will try to run the code below, and if it encounters the specified error it will run the statement.
         try:
+            #This attempts to open the boltbyte_data.json in read mode, under the utf-8 encoding as a variable called file. we can tell its read mode as the "r" means read.
             with open(BOLTBYTEFILE,"r",encoding="utf-8" ) as file:
+                #then it attempts to load the json file which is now assigned a local variable called file.
                 return json.load(file)
+        #This error is specificly for if the file is missing.
         except FileNotFoundError:
+            #When the execpt is pulled the code will pass and reach the return statement
             pass
+    #when this return statement is run it creates a file nammed boltbyte_data.json with an initial container called user_data
     return {"user_data": {}}
 
 def save_data(data):
-    '''This def upon being called will attempt to save any data feed into it to the Boltbyte_data.json fil according to its formatting'''
+    '''This def upon being called will attempt to save any data feed into it to the Boltbyte_data.json file according to its formatting'''
+    #This attempts to open the boltbyte_data.json in write mode, under the utf-8 encoding as a variable called file. we can tell its write mode as the "w" means write.
     with open(BOLTBYTEFILE, "w", encoding="utf-8") as file:
+        #when this line is run it dumps the data stored in the data parameter (Which is set where ever the def is called)
+        #and writes it to the file parameter which is the filepath to boltbyte_data.json file
         json.dump(data,file, indent=4)
-
 class BoltByteProject():
     '''This Class contains every other Def, as to be able to run and rerun certain defs upon the need.'''
+    #This def, __init__ is used to declare the self. parameter as to allow other defs with the BoltByteProject class 
+    #To use certain variables from other defs when the program is running.
+    #it also allows for root to be delcared within it to be used within tkinter modules.
     def __init__(self,root):
+        #This loads the json file into the data dict
         self.data = load_data()
-        
+        #This declares that the root parameter is the root varaible 
         self.root = root
-        
+        #This gives the program a name that can be seen just above the title
         self.root.title("Bolt & Byte Tech Hire Interface")
-        
+        #This sizes the progam to 935 pixels by 900 pixels, this is done to fit the amount of items
         self.root.geometry("935x900")
-        
+        #This creates an empty cart dict that is used to store the items the user adds
         self.cart = {}
-        
+        #this also creates an empty dict, though it is used to store the number of items
+        #A user has selected in the items row, its a dict because I use a for loop to generate
+        #Each item row
         self.item_amount = {}
-        
+        #This creates the main frame every other defs tkinter widgets are stored under
         main_frame = ttk.Frame(root)
-        
+        #This makes the frame fill the X axis and Y axis of the program
         main_frame.pack(fill="both")
-        
+        #This creates a title on the main frame with the name of the operating company.
         main_title = ttk.Label(main_frame, text="Bolt & Byte Tech Hire",font=("Helvetica", 25))
+        #The .pack statement is empty as does not require any changes
         main_title.pack()
-        
+        #this style
         style = ttk.Style()
 
         style.configure("TNotebook",borderwith="0")
@@ -162,7 +188,7 @@ class BoltByteProject():
         item_rows_price = tk.Label(item_rows_colour, text=f"${item["dayprice"]}/day", font=("Helvetica", 10), bg=item["colour"])
         item_rows_price.pack(anchor="w")
         
-        item_rows_button = tk.Frame(item_rows_frame, bg=item["colour"])
+        item_rows_button = tk.Frame(item_rows_frame, bg=item["colour"], )
         item_rows_button.pack(side="right", padx=8, pady=3)
         
         item_rows_label = tk.Label(item_rows_button, text="0", font=("Helvetica", 12, "bold"), fg="black", bg=item["colour"], width=2, anchor="center")
@@ -260,6 +286,31 @@ class BoltByteProject():
             else:
                 messagebox.showerror(title="Name Error",message="Username must not contain any non alphabet charactors.\n Please reenter your name")
                 return
+        checkout_date_check_p = False
+        checkout_date_check_d = False
+        while checkout_date_check_d is False and checkout_date_check_p is False:
+            try:
+                pickup = datetime.datetime.strptime(self.pickup_date.get().strip(), "%d/%m/%Y").date()
+                dropoff = datetime.datetime.strptime(self.dropoff_date.get().strip(), "%d/%m/%Y").date()
+                checkout_date_check_p = True
+                checkout_date_check_d = True
+            except ValueError:
+                messagebox.showwarning(title="Date Error: Incorrect Format",message="The Format of the Hire dates is incorrect \n please reenter your start and end hire dates")
+                return
+            if checkout_date_check_p is True and checkout_date_check_d is True:
+                if pickup > dropoff:
+                    messagebox.showinfo(title="Date Time Error",message="Pickup date is greater than dropoff date, \n please reenter your Hire dates.")
+                    return
+                elif pickup < dropoff:
+                    pass
+                else:
+                    messagebox.showerror(title="Unknown error",message="Unknown error within Dates, reenter your start and end hire dates.")
+                    return
+            else:
+                messagebox.showerror(title="Date Error",message="Please do not input any alphabet charactors in the date fields. \n Please reenter your the Dates")
+                return
+                
+            
         if not self.cart:
             messagebox.showwarning("Cart is empty", "Please add items to cart to proceed.")
             return
@@ -297,7 +348,7 @@ class BoltByteProject():
         self.data["user_data"][receipt_id] = record
         save_data(self.data)
         
-        for item_id in self.cart.keys():
+        for item_id in self.cart:
             self.item_amount[item_id].config(text="0")
             
         self.cart.clear()
@@ -492,7 +543,7 @@ class BoltByteProject():
         admin_scrollbar = ttk.Scrollbar(admin_record_listbox)
         admin_scrollbar.pack(side="right", fill="y")
         
-        self.admin_record_list = tk.Listbox(admin_record_listbox, font=("Helvetica", 12), yscrollcommand=admin_scrollbar.set)
+        self.admin_record_list = tk.Listbox(admin_record_listbox, font=("Helvetica", 12),bg="#DCDAD5",fg="black", yscrollcommand=admin_scrollbar.set)
         self.admin_record_list.pack(side="left", expand=True, fill="both")        
         admin_scrollbar.configure(command=self.admin_record_list.yview)
         self.admin_record_list.bind("<<ListboxSelect>>", self.record_show)
@@ -514,7 +565,7 @@ class BoltByteProject():
         admin_item_scrollbar = ttk.Scrollbar(admin_item_hired)
         admin_item_scrollbar.pack(side="right", fill="y")
         
-        self.admin_item_list = tk.Listbox(admin_item_hired, font=("Helvetica", 10), yscrollcommand=admin_item_scrollbar.set)
+        self.admin_item_list = tk.Listbox(admin_item_hired,font=("Helvetica", 10) ,bg="#DCDAD5" ,fg="black" , yscrollcommand=admin_item_scrollbar.set)
         self.admin_item_list.pack(side="left", expand=True, fill="both")
         
         admin_item_scrollbar.configure(command=self.admin_item_list.yview)
@@ -569,7 +620,7 @@ class BoltByteProject():
         if selected_record:
             receipt_id = self.selected_receipt_id[selected_record[0]]
             record = self.data["user_data"][receipt_id]
-            details_text = f"Customer: {record['customer_name']}\nPickup Date: {record['pickup_date']}\nDropoff Date: {record['dropoff_date']}\nDays Hired: {record['days_hired']}\nSubtotal: ${record['subtotal']:.2f}\nTax: ${record['tax']:.2f}\nTotal: ${record['total']:.2f}\nReturned: {'Yes' if record.get('Has_Returned', False) else 'No'}"
+            details_text = f"Customer: {record['customer_name']}\nPickup Date: {record['pickup_date']}\nDropoff Date: {record['dropoff_date']}\nDays Hired: {record['days_hired']}\nSubtotal: ${record['subtotal']:.2f}\nTax: ${record['tax']:.2f}\nTotal: ${record['total']:.2f}\nReturned: {'Yes' if record.get('Returned', 1) else 'No'}"
             self.admin_record_details.config(text=details_text)
             
             self.admin_item_list.delete(0, tk.END)
