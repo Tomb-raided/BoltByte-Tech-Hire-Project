@@ -37,25 +37,7 @@ GST = 0.15
 # The BOLTBYTEFILE constant is a file path for the boltbyte_data.json file.
 BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyte_data.json")
 # Adminpassword = str("TestPassword").
-def load_data():
-    '''When called the def will attempt to call the boltbyte_data.json file, and if it doesn't exist it will create a new file named such.'''
-    if os.path.exists(BOLTBYTEFILE):
-        # This will try to run the code below, and if it encounters the specified error it will run the statement.
-        try:
-            # This attempts to open the boltbyte_data.json in read mode, under the utf-8 encoding as a variable called file. we can tell its read mode as the "r" means read.
-            with open(BOLTBYTEFILE,"r",encoding="utf-8" ) as file:
-                # Then it attempts to load the json file which is now assigned a local variable called file.
-                return json.load(file)
-        # This error is specificly for if the file is missing.
-        except FileNotFoundError:
-            # When the execpt is pulled the code will pass and reach the return statement.
-            pass
-    # When this return statement is run it creates a file nammed boltbyte_data.json with an initial container called user_data.
 #This GST constant is 0.15 to act as 15% when calculating the taxed amount and the total
-GST = 0.15
-#The BOLTBYTEFILE constant is a file path for the boltbyte_data.json file.
-BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyte_data.json")
-#adminpassword = str("TestPassword")
 def load_data():
     '''When called the def will attempt to call the boltbyte_data.json file, and if it doesn't exist it will create a new file named such.'''
     if os.path.exists(BOLTBYTEFILE):
@@ -288,7 +270,7 @@ class BoltByteProject():
         date_row_entry.grid(row=row_num, column=1, padx=6, pady=2)
         # When the date_row_entry value is edited, this statement is run and updates the cart.
         # Lambda is required in this statement because update_cart requires it to be able to constantly update the prices.(also to not throw an error).
-        date_row_entry.bind("<FocusOut>", lambda: self.update_cart())
+        date_row_entry.bind("<FocusOut>", lambda Run: self.update_cart())
         
     def row_totals(self, parent, item, value,row_num):
         '''This def creates the rows which are assigned to Tax, Subtotal, Total, and the total Rental length'''
@@ -444,12 +426,8 @@ class BoltByteProject():
                 checkout_date_check_d = True
             # Runs if there is an error with the formating, like unexpected charactors in the date input runs the code below, displays why, and resets the dates.
             except ValueError:
-                # Displays a messagebox with an error sign explaining that user's date format is not valid and that the dates will be reset.
-                messagebox.showwarning(title="Date Error: Incorrect Format",message="The Format of the Hire dates is incorrect \n Dates will be reset, please re-enter your Hire dates")
-                # Resets the dropoff date to the day after the current day.
-                self.dropoff_date = tk.StringVar(value=(datetime.date.today() + datetime.timedelta(days=1)).strftime("%d/%m/%Y"))
-                # Resets the pickup date to the current day.
-                self.pickup_date = tk.StringVar(value=datetime.date.today().strftime("%d/%m/%Y"))
+                # Displays a messagebox with an error sign explaining that user's date format is not valid.
+                messagebox.showwarning(title="Date Error: Incorrect Format",message="The Format of the Hire dates is incorrect \n please re-enter your Hire dates")
                 # Returns nothing, exiting the def.
                 return
             # Compairs the pickup and dropoff vars if checkout_date_check_p is True and checkout_date_check_d is True.
