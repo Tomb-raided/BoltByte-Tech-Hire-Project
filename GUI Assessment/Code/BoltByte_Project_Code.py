@@ -399,12 +399,24 @@ class BoltByteProject():
             checkout_name_check = checkout_name.isalpha()
             # If the checkout_name_check bool is true the if statement runs.
             if checkout_name_check is True:
-                # Exists the while loop and continues on.
-                pass
+                # If the users name is less than 35 charactors long this if statement runs.
+                if len(checkout_name) < 28:
+                    # Exits the while loop and continues on.
+                    pass
+                # If the users name is longer 28 charactors long then this else statement runs.
+                else:
+                    # Displays a messagebox with an error sign explaining why the user's input name is not valid.
+                    messagebox.showerror(title="Name Error",message="Username must only be a max of 27 charactors \n Please re-enter your name")
+                    # Clears the name_entry field.
+                    self.name_entry.set("")
+                    # Returns nothing, exiting the def.
+                    return
             # If the checkout_name_check bool isn't true this else statement runs.
             else:
                 # Displays a messagebox with an error sign explaining why the user's input name is not valid.
-                messagebox.showerror(title="Name Error",message="Username must only contain alphabet charactors.\n Please reenter your name")
+                messagebox.showerror(title="Name Error",message="Username must only contain alphabet charactors.\n Please re-enter your name")
+                # Clears the name_entry field.
+                self.name_entry.set("")
                 # Returns nothing, exiting the def.
                 return
         # Creates a bool called checkout_date_check_p set to false, the p is for pickup.
