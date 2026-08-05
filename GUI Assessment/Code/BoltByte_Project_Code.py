@@ -17,7 +17,16 @@ import os
 # The uuid library allows for my program to generate a random string of charactors to be used as an individual.
 # Identifier for receipts, allowing for users of the same name but differnet hire dates to be stored.
 import uuid
-
+# Trys to import PIL, added check because it is a non standerd library that user may forget to install.
+try:
+    # The pillow or PIL library is used to import the logo my program uses.
+    # It is the single non standard python library included within my program.
+    # Only imports the two modules I need to display an image and allow it to interact with TK.
+    from PIL import Image, ImageTk
+except ImportError:
+    #   User will be informed if the library cannot load later so a messagebox is omitted here.
+    #   Continues on so the program can run.
+    pass
 # This STORE_ITEMS constant is a list of the items on the store/rentals page of the program.
 # An indefinite amount of items can be added as long as they follow the following template.
 # {"id": "000", "name": "ITEM_NAME", "colour": "COLOURHEXCODE", "dayprice": 0.00},.
@@ -36,6 +45,8 @@ STORE_ITEMS = [
 GST = 0.15
 # The BOLTBYTEFILE constant is a file path for the boltbyte_data.json file.
 BOLTBYTEFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boltbyte_data.json")
+# The BOLTBYTEFILE constant is a file path for the Bolt_Byte_Logo.png file.
+BOLTBYTELOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Bolt_Byte_Logo.png")
 # Adminpassword = str("TestPassword").
 #This GST constant is 0.15 to act as 15% when calculating the taxed amount and the total
 def load_data():
@@ -89,6 +100,28 @@ class BoltByteProject():
         main_title = ttk.Label(main_frame, text="Bolt & Byte Tech Hire",font=("Helvetica", 25))
         # The .pack statement is empty as does not require any changes.
         main_title.pack()
+        # attempts to open the image, if library or image is missing catches the error.
+        try:
+            # This variable opens the image file at the filepath defined by BOLTBYTELOGO.
+            bolt_byte_logo = Image.open(BOLTBYTELOGO)
+            # Resizes the image file to 64 by 64 pixels.
+            bolt_byte_logo = bolt_byte_logo.resize((64,64))
+            # Makes the image a imageTk file under formated_logo to use in a tk element.
+            formated_logo = ImageTk.PhotoImage(bolt_byte_logo)
+            # Creates a label to put the image within displaying it to the user.
+            logo_display = ttk.Label(main_frame, image=formated_logo)
+            # Specifies specificly where the image should be placed on the page with .place.
+            logo_display.place(x="240",y="1")
+            # Creates an empty label so extend the main_frame to include all of the image
+            title_setter = ttk.Label(main_frame, text="")
+            # Defines how much padding the title has by 4 pixels on the y axis.
+            title_setter.pack(pady=4)
+        #if any error occurs with this subsection of code it will catch it and explain what to do.
+        except FileNotFoundError, ModuleNotFoundError:
+            #shows a messagebox explaining the error and what to do.
+            messagebox.showinfo("Error Loading Image", "Please refer to the README file for instruction. \n Program will continue to function normally. ")
+            #passes the statement to allow the Program to function.
+            pass
         # This style variable is used to implement the theme styles from ttk.
         style = ttk.Style()
         # This uses the styling from ttk to change the borderwidth of the Notebook buttons to not show.
